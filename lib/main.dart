@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:laboratorios/interfazUsuario.dart'; 
+import 'package:laboratorios/GestionVentas.dart'; 
+
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,6 +80,28 @@ class MyHomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: leerUsuarios,
               child: Text('Leer Usuarios'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => interfazUsuario(),
+                  ),
+                );
+              },
+              child: Text('Ir a Interfaz Usuario'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GestionVentas(), 
+                  ),
+                );
+              },
+              child: Text('Ir a Gestión de Ventas'),
             ),
           ],
         ),
