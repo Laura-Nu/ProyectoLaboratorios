@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laboratorios/login.dart';
 
+import 'Home.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Inicializa Firebase 
@@ -18,6 +20,9 @@ void main() async {
   );
   runApp(MyApp());
 }
+
+
+
 
 class MyApp extends StatelessWidget {
   @override
