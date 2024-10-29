@@ -11,29 +11,7 @@ class Menu extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            /*DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue[800],
-              ),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 40, color: Colors.blue),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Interfaz Usuario',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),// */
+            
             _buildDrawerItem(
               icon: Icons.menu,
               title: 'NAVEGADOR',

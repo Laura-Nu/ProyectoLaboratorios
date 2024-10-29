@@ -1,26 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'Home.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'LIA - LAB',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const LoginPage(),
-    );
-  }
-}
+import 'main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,6 +15,29 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _testFirebaseConnection();
+  }
+
+  Future<void> _testFirebaseConnection() async {
+    bool isConnected = await FirebaseService.testConnection();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isConnected
+                ? 'Conexion a Firebase exitosa'
+                : 'Error en la conexion a Firebase',
+          ),
+          backgroundColor: isConnected ? Colors.green : Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -42,16 +46,89 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _login() {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      // logica para la autenticacion
-      print('Usuario: ${_usernameController.text}');
-      print('Contraseña: ${_passwordController.text}');
-      print('Recordar: $_rememberMe');
+      setState(() {
+        _isLoading = true;
+      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Procesando datos...')),
-      );
+      try {
+        
+        final QuerySnapshot result = await FirebaseFirestore.instance
+            .collection('superadmin')
+            .where('Nombre', isEqualTo: _usernameController.text)
+            .where('Contraseña', isEqualTo: _passwordController.text)
+            .get();
+
+        if (result.docs.isEmpty) {
+          throw Exception('Credenciales inválidas');
+        }
+
+        
+        final userDoc = result.docs.first;
+
+        
+        Timestamp fechaInicio = userDoc['FechaInicio'];
+        Timestamp fechaFin = userDoc['FechaFin'];
+        DateTime ahora = DateTime.now(); 
+
+        
+        if (ahora.isBefore(fechaInicio.toDate()) || ahora.isAfter(fechaFin.toDate())) {
+          
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Error'),
+              content: const Text('MEMBRESÍA CADUCADA'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); 
+                  },
+                  child: const Text('Aceptar'),
+                ),
+              ],
+            ),
+          );
+          return; // Salir de la función para no continuar con el login
+        }
+
+        if (mounted) {
+          // Login exitoso
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Inicio de sesion exitoso'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Navegar a la página principal
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.toString().contains('Credenciales incorrectas')
+                    ? 'Usuario o contraseña incorrectos'
+                    : 'Error al iniciar sesion. Intente nuevamente',
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
 
@@ -85,13 +162,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-
                         const Icon(
                           Icons.science,
                           size: 80,
                           color: Colors.blue,
                         ),
-
                         const SizedBox(height: 16),
                         const Text(
                           'LIA - LAB',
@@ -102,8 +177,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 32),
-
-                        
                         TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(
@@ -121,8 +194,6 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        // Campo de contraseña
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
@@ -141,8 +212,6 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        
                         CheckboxListTile(
                           title: const Text('Recordarme'),
                           value: _rememberMe,
@@ -155,35 +224,30 @@ class _LoginPageState extends State<LoginPage> {
                           contentPadding: EdgeInsets.zero,
                         ),
                         const SizedBox(height: 24),
-
-                        
                         SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton(
-                             onPressed: () {
-                              Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => HomePage()),
-                                );
-                              },
+                            onPressed: _isLoading ? null : _login,
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              'Iniciar Sesión',
-                              style: TextStyle(fontSize: 16),
-                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    'Iniciar Sesion',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Agregar enlace de "olvidar contraseña"
                         TextButton(
                           onPressed: () {
-                            // logica para recuperar la contraseña
+                            // Logica para recuperar codigo
                           },
                           child: const Text(
                             '¿Olvidaste tu contraseña?',

@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
               ),
               SizedBox(height: 20),
               Text(
-                '¡Bienvenido al Laboratorio!',
+                'Bienvenido a Lia - Lab',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -43,7 +43,7 @@ class HomePage extends StatelessWidget {
               ),
               SizedBox(height: 10),
               Text(
-                'Sistema de Gestión de Laboratorio',
+                'Sistema de Gestion del Servicio',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white,
