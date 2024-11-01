@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:laboratorios/screens/reportes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  
   await Firebase.initializeApp(
-    options: const FirebaseOptions(
+    options: FirebaseOptions(
       apiKey: "AIzaSyDv8ob1atV7_hYOBglo2zTT_2xNcXSOJNA",
       authDomain: "bddlabo.firebaseapp.com",
       projectId: "bddlabo",
       storageBucket: "bddlabo.appspot.com",
       messagingSenderId: "209852280768",
       appId: "1:209852280768:web:3ed4ff50de18c2abe52225",
-      measurementId: "G-RPLFXBQ278"
+      measurementId: "G-RPLFXBQ278",
     ),
   );
-  
   runApp(const MyApp());
 }
 
