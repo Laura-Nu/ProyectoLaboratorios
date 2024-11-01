@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
-import 'package:laboratorios/interfazUsuario.dart';
+import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 
 class UsuarioUpdate extends StatefulWidget {
   @override

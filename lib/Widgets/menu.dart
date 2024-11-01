@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
+import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 
 class Menu extends StatelessWidget {
   const Menu({super.key});
@@ -27,7 +29,23 @@ class Menu extends StatelessWidget {
             _buildDrawerItem(
               icon: Icons.person,
               title: 'PERFIL',
-              onTap: () => Navigator.pushReplacementNamed(context, '/perfil'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => interfazUsuario()),
+                );
+              },
+              textColor: Colors.white,
+            ),
+            _buildDrawerItem(
+              icon: Icons.person,
+              title: 'VENTAS',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GestionVentas()),
+                );
+              },
               textColor: Colors.white,
             ),
             _buildDrawerItem(

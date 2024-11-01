@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:laboratorios/screens/reportes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:laboratorios/interfazUsuario.dart'; 
-import 'package:laboratorios/GestionVentas.dart'; 
+import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
+import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'login.dart';
 
 void main() async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:laboratorios/GestionVentas.dart';
+import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 
 class CreateAnalisis extends StatefulWidget {
   @override
