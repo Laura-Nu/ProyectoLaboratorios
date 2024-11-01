@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:laboratorios/UpdateAnalisis.dart';
-import 'package:laboratorios/interfazUsuario.dart'; // Asegúrate de que la ruta sea correcta
-import 'package:laboratorios/CreateAnalisis.dart';
-import 'package:laboratorios/ViewAnalisis.dart';
+import 'package:laboratorios/Servicios/Sales/UpdateAnalisis.dart';
+import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
+import 'package:laboratorios/Servicios/Sales/CreateAnalisis.dart';
+import 'package:laboratorios/Servicios/Sales/ViewAnalisis.dart';
+import 'package:laboratorios/Widgets/menu.dart';
 
 class GestionVentas extends StatefulWidget {
   @override
@@ -24,86 +25,7 @@ class _GestionVentasState extends State<GestionVentas> {
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
-      drawer: Drawer(
-        child: Container(
-          color: Color(0xFF5B7FCE), // Fondo del navbar azul
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Text(
-                  'NAVEGADOR',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.home, color: Colors.black, size: 30),
-                      title: Text(
-                        'HOME',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.person, color: Colors.black, size: 30),
-                      title: Text(
-                        'PERFIL',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => interfazUsuario()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.check_box, color: Colors.black, size: 30),
-                      title: Text(
-                        'SERVICIOS',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.shopping_cart, color: Colors.black, size: 30),
-                      title: Text(
-                        'COMPRAS',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.report, color: Colors.black, size: 30),
-                      title: Text(
-                        'REPORTES',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.login, color: Colors.black, size: 30),
-                      title: Text(
-                        'LOG UP',
-                        style: TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      drawer: const Menu(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

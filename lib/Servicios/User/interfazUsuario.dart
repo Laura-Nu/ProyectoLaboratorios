@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:laboratorios/UsuarioUpdate.dart';
+import 'package:laboratorios/Servicios/User/UsuarioUpdate.dart';
+import 'package:laboratorios/Widgets/menu.dart';
 
 void main() {
   runApp(interfazUsuario());
@@ -27,81 +28,7 @@ class _interfazUsuarioState extends State<interfazUsuario> {
           iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
         ),
-        drawer: Drawer(
-          child: Container(
-            color: Color(0xFF5B7FCE), 
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text(
-                    'NAVEGADOR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.home, color: Colors.black, size: 30),
-                        title: Text(
-                          'HOME',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.person, color: Colors.black, size: 30),
-                        title: Text(
-                          'PERFIL',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.check_box, color: Colors.black, size: 30),
-                        title: Text(
-                          'SERVICIOS',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.shopping_cart, color: Colors.black, size: 30),
-                        title: Text(
-                          'COMPRAS',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.report, color: Colors.black, size: 30),
-                        title: Text(
-                          'REPORTES',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.login, color: Colors.black, size: 30),
-                        title: Text(
-                          'Log Up',
-                          style: TextStyle(color: Colors.white, fontSize: 22),
-                        ),
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        drawer: const Menu(),
         body: Column(
           children: [
             Expanded(
