@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
+import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
 
 class Menu extends StatelessWidget {
   const Menu({super.key});
@@ -13,7 +14,6 @@ class Menu extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            
             _buildDrawerItem(
               icon: Icons.menu,
               title: 'NAVEGADOR',
@@ -50,8 +50,13 @@ class Menu extends StatelessWidget {
             ),
             _buildDrawerItem(
               icon: Icons.design_services,
-              title: 'SERVICIOS',
-              onTap: () => Navigator.pushReplacementNamed(context, '/servicios'),
+              title: 'PACIENTES',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GestionPatient()),
+                );
+              },
               textColor: Colors.white,
             ),
             _buildDrawerItem(
