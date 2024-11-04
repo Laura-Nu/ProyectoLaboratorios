@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
+import 'package:laboratorios/Servicios/analysis/GestionAnalysis.dart';
 
 class Menu extends StatelessWidget {
   const Menu({super.key});
@@ -61,8 +62,13 @@ class Menu extends StatelessWidget {
             ),
             _buildDrawerItem(
               icon: Icons.shopping_cart,
-              title: 'COMPRAS',
-              onTap: () => Navigator.pushReplacementNamed(context, '/compras'),
+              title: 'ANALISIS',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GestionAnalysis()),
+                );
+              },
               textColor: Colors.white,
             ),
             _buildDrawerItem(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class UpdatePatient extends StatefulWidget {
@@ -11,17 +12,25 @@ class UpdatePatient extends StatefulWidget {
     Key? key,
   }) : super(key: key) {
     _nombreController.text = patientData['nombre'] ?? '';
-    _apellidoPaternoController.text = patientData['apellido_paterno'] ?? '';
-    _numeroController.text = patientData['numero'] ?? '';
+    _apellidoController.text = patientData['apellido'] ?? '';
+    _numeroController.text = patientData['telefono'] ?? '';
     _correoController.text = patientData['email'] ?? '';
     _direccionController.text = patientData['direccion'] ?? '';
-    _fechaNacimiento =
-        patientData['fecha_nacimiento']?.toDate() ?? DateTime.now();
+
+    // Verificar si 'fechaNacimiento' es un Timestamp antes de convertirlo
+    if (patientData['fechaNacimiento'] is Timestamp) {
+      _fechaNacimiento = (patientData['fechaNacimiento'] as Timestamp).toDate();
+    } else if (patientData['fechaNacimiento'] is DateTime) {
+      _fechaNacimiento = patientData['fechaNacimiento'];
+    } else {
+      _fechaNacimiento =
+          DateTime.now(); // Valor predeterminado si no se encuentra
+    }
   }
 
   static final TextEditingController _nombreController =
       TextEditingController();
-  static final TextEditingController _apellidoPaternoController =
+  static final TextEditingController _apellidoController =
       TextEditingController();
   static final TextEditingController _direccionController =
       TextEditingController();
@@ -29,7 +38,6 @@ class UpdatePatient extends StatefulWidget {
       TextEditingController();
   static final TextEditingController _correoController =
       TextEditingController();
-
   static DateTime _fechaNacimiento = DateTime.now();
 
   @override
@@ -40,7 +48,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
   @override
   void dispose() {
     UpdatePatient._nombreController.dispose();
-    UpdatePatient._apellidoPaternoController.dispose();
+    UpdatePatient._apellidoController.dispose();
     UpdatePatient._direccionController.dispose();
     UpdatePatient._numeroController.dispose();
     UpdatePatient._correoController.dispose();
@@ -56,14 +64,21 @@ class _UpdatePatientState extends State<UpdatePatient> {
             .doc(widget.patientId)
             .update({
           'nombre': UpdatePatient._nombreController.text,
-          'apellido_paterno': UpdatePatient._apellidoPaternoController.text,
+          'apellido': UpdatePatient._apellidoController.text,
           'direccion': UpdatePatient._direccionController.text,
-          'numero': UpdatePatient._numeroController.text,
-          'correo': UpdatePatient._correoController.text,
-          'fecha_nacimiento': UpdatePatient._fechaNacimiento,
+          'telefono': UpdatePatient._numeroController.text,
+          'email': UpdatePatient._correoController.text,
+          'fechaNacimiento': UpdatePatient._fechaNacimiento,
           'timestamp': FieldValue.serverTimestamp(),
         });
-        Navigator.pop(context); // Regresar a la pantalla anterior
+
+        // Navegar a la pantalla de Gestión de Pacientes después de actualizar
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GestionPatient(),
+          ),
+        );
       } catch (e) {
         print('Error al actualizar paciente: $e');
       }
@@ -73,7 +88,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
   bool _validateInputs() {
     // Validar que todos los campos estén llenos
     if (UpdatePatient._nombreController.text.isEmpty ||
-        UpdatePatient._apellidoPaternoController.text.isEmpty ||
+        UpdatePatient._apellidoController.text.isEmpty ||
         UpdatePatient._direccionController.text.isEmpty ||
         UpdatePatient._numeroController.text.isEmpty ||
         UpdatePatient._correoController.text.isEmpty) {
@@ -139,8 +154,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
             SizedBox(height: 20),
             _buildTextField('Nombre', UpdatePatient._nombreController),
             SizedBox(height: 20),
-            _buildTextField(
-                'Apellido Paterno', UpdatePatient._apellidoPaternoController),
+            _buildTextField('Apellido', UpdatePatient._apellidoController),
             SizedBox(height: 20),
             _buildTextField('Dirección', UpdatePatient._direccionController),
             SizedBox(height: 20),
@@ -150,7 +164,6 @@ class _UpdatePatientState extends State<UpdatePatient> {
             _buildTextField('Email', UpdatePatient._correoController),
             SizedBox(height: 20),
             _buildDateField(context),
-            SizedBox(height: 20),
           ],
         ),
       ),

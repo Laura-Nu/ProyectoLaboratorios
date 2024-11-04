@@ -1,48 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firestore
-import 'package:laboratorios/Servicios/Patient/CreatePatient.dart';
-import 'package:laboratorios/Servicios/Patient/UpdatePatient.dart';
-import 'package:laboratorios/Servicios/Patient/DeletePatient.dart';
+import 'package:laboratorios/Servicios/analysis/CreateAnalysis.dart';
+import 'package:laboratorios/Servicios/analysis/DeleteAnalysis.dart';
+import 'package:laboratorios/Servicios/analysis/UpdateAnalysis.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
-class GestionPatient extends StatefulWidget {
+class GestionAnalysis extends StatefulWidget {
   @override
-  _GestionPatientState createState() => _GestionPatientState();
+  _GestionAnalisisState createState() => _GestionAnalisisState();
 }
 
-class _GestionPatientState extends State<GestionPatient> {
-  List<Map<String, dynamic>> pacientes = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPacientes(); // Cargar los pacientes al iniciar
-  }
-
-  Future<void> _fetchPacientes() async {
-    // Obtener datos de Firebase Firestore
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('pacientes').get();
-    setState(() {
-      // Mapear documentos y añadirlos a la lista de pacientes
-      pacientes = snapshot.docs
-          .map((doc) => {
-                'id': doc.id,
-                'nombre': doc['nombre'],
-                'apellido_paterno': doc['apellido'],
-                'direccion': doc['direccion'],
-                'telefono': doc['telefono'],
-                'email': doc['email'],
-              })
-          .toList();
-    });
-  }
+class _GestionAnalisisState extends State<GestionAnalysis> {
+  List<Map<String, dynamic>> analisisList =
+      []; // Lista para almacenar los datos de los análisis
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gestión de Pacientes'),
+        title: Text('Gestión de Análisis'),
       ),
       drawer: const Menu(),
       body: Padding(
@@ -53,7 +28,7 @@ class _GestionPatientState extends State<GestionPatient> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Gestión de Pacientes',
+                  'Gestión de Análisis',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
@@ -70,14 +45,16 @@ class _GestionPatientState extends State<GestionPatient> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final newPatient = await Navigator.push(
+                    // Esperar los datos del análisis devueltos desde CreateAnalisis
+                    final newAnalisis = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreatePatient()),
+                      MaterialPageRoute(builder: (context) => CreateAnalysis()),
                     );
 
-                    if (newPatient != null) {
+                    // Si newAnalisis no es nulo, añadirlo a la lista y actualizar el estado
+                    if (newAnalisis != null) {
                       setState(() {
-                        pacientes.add(newPatient);
+                        analisisList.add(newAnalisis);
                       });
                     }
                   },
@@ -85,7 +62,7 @@ class _GestionPatientState extends State<GestionPatient> {
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text('Agregar Paciente'),
+                  child: Text('Agregar Análisis'),
                 ),
               ],
             ),
@@ -95,20 +72,22 @@ class _GestionPatientState extends State<GestionPatient> {
                 children: [
                   DataTable(
                     columns: [
+                      DataColumn(label: Text('Código')),
                       DataColumn(label: Text('Nombre')),
-                      DataColumn(label: Text('Apellido')),
-                      DataColumn(label: Text('Dirección')),
-                      DataColumn(label: Text('Teléfono')),
-                      DataColumn(label: Text('Email')),
+                      DataColumn(label: Text('Descripción')),
+                      DataColumn(label: Text('Estado')),
+                      DataColumn(label: Text('Precio')),
+                      DataColumn(label: Text('Rango')),
                       DataColumn(label: Text('Acciones')),
                     ],
-                    rows: pacientes.map<DataRow>((paciente) {
+                    rows: analisisList.map<DataRow>((analisis) {
                       return DataRow(cells: [
-                        DataCell(Text(paciente['nombre'])),
-                        DataCell(Text(paciente['apellido'])),
-                        DataCell(Text(paciente['direccion'])),
-                        DataCell(Text(paciente['telefono'])),
-                        DataCell(Text(paciente['email'])),
+                        DataCell(Text(analisis['codigo'].toString())),
+                        DataCell(Text(analisis['nombre'])),
+                        DataCell(Text(analisis['descripcion'])),
+                        DataCell(Text(analisis['estado'])),
+                        DataCell(Text('\$${analisis['precio']}')),
+                        DataCell(Text('${analisis['rango']}')),
                         DataCell(
                           Row(
                             children: [
@@ -117,9 +96,9 @@ class _GestionPatientState extends State<GestionPatient> {
                                 onPressed: () {
                                   showDialog(
                                     context: context,
-                                    builder: (context) => UpdatePatient(
-                                      patientId: paciente['id'],
-                                      patientData: paciente,
+                                    builder: (context) => UpdateAnalysis(
+                                      analisisId: analisis['codigo'],
+                                      analisisData: analisis,
                                     ),
                                   );
                                 },
@@ -129,8 +108,8 @@ class _GestionPatientState extends State<GestionPatient> {
                                 onPressed: () {
                                   showDialog(
                                     context: context,
-                                    builder: (context) => DeletePatient(
-                                      patientId: paciente['id'],
+                                    builder: (context) => DeleteAnalysis(
+                                      analisisId: analisis['codigo'],
                                     ),
                                   );
                                 },

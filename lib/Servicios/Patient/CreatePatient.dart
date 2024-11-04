@@ -28,7 +28,7 @@ class _CreatePatientState extends State<CreatePatient> {
         DocumentReference docRef =
             await FirebaseFirestore.instance.collection('pacientes').add({
           'nombre': nombreController.text,
-          'apellido_paterno': apellidoPaternoController.text,
+          'apellido': apellidoPaternoController.text,
           'direccion': direccionController.text,
           'telefono': telefonoController.text,
           'email': correoController.text,
@@ -40,7 +40,7 @@ class _CreatePatientState extends State<CreatePatient> {
         final newPatient = {
           'id': docRef.id,
           'nombre': nombreController.text,
-          'apellido_paterno': apellidoPaternoController.text,
+          'apellido': apellidoPaternoController.text,
           'direccion': direccionController.text,
           'telefono': telefonoController.text,
           'email': correoController.text,
