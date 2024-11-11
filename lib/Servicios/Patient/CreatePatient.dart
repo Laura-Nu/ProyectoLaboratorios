@@ -88,6 +88,21 @@ class _CreatePatientState extends State<CreatePatient> {
           key: _formKey,
           child: ListView(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _addPatient(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Agregar Paciente'),
+                  ),
+                ],
+              ),
               Text(
                 'Nombre',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -174,16 +189,6 @@ class _CreatePatientState extends State<CreatePatient> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _addPatient(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Agregar Paciente'),
-              ),
             ],
           ),
         ),

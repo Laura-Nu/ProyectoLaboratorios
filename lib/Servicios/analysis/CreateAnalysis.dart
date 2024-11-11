@@ -64,23 +64,28 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
           key: _formKey,
           child: ListView(
             children: [
-              buildTextField('Código', codigoController),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _addAnalisis(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Agregar Análisis'),
+                  ),
+                ],
+              ),
+              buildTextField('Nombre', nombreController),
               buildTextField('Descripción', descripcionController),
               buildTextField('Estado', estadoController),
-              buildTextField('Nombre', nombreController),
+              buildTextField('Código', codigoController),
               buildNumberField('Precio', precioController),
               buildNumberField('Rango', rangoController),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _addAnalisis(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Agregar Análisis'),
-              ),
             ],
           ),
         ),

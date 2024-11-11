@@ -2,45 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DeletePatient extends StatelessWidget {
-  final String patientId; // ID del paciente a eliminar
+  final String patientId;
+  final VoidCallback onDelete; // Callback para actualizar la pantalla
 
-  DeletePatient({required this.patientId});
+  DeletePatient({required this.patientId, required this.onDelete});
+
+  Future<void> _deletePatient(BuildContext context) async {
+    await FirebaseFirestore.instance
+        .collection('pacientes')
+        .doc(patientId)
+        .delete();
+    onDelete(); // Llamar a la función callback para actualizar la pantalla
+    Navigator.pop(context); // Cerrar el diálogo
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Eliminación de Datos"),
-      content: Text("¿Estás seguro de eliminar estos datos?"),
+      title: Text('Eliminar Paciente'),
+      content: Text('¿Está seguro de que desea eliminar este paciente?'),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.pop(context); // Cierra el diálogo
-          },
-          child: Text("Cancelar"),
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: () async {
-            try {
-              await FirebaseFirestore.instance
-                  .collection('patients')
-                  .doc(patientId)
-                  .delete();
-              Navigator.pop(context); // Cierra el diálogo
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Paciente eliminado exitosamente.')),
-              );
-            } catch (e) {
-              print('Error al eliminar el paciente: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error al eliminar el paciente.')),
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-          ),
-          child: Text("Confirmar"),
+        TextButton(
+          onPressed: () => _deletePatient(context),
+          child: Text('Eliminar', style: TextStyle(color: Colors.red)),
         ),
       ],
     );

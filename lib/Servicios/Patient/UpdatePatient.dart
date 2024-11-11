@@ -1,134 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
+import 'package:flutter/services.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class UpdatePatient extends StatefulWidget {
-  final String patientId; // ID del paciente a actualizar
+  final String patientId;
+  final Map<String, dynamic> patientData;
 
-  UpdatePatient({
-    required this.patientId,
-    required Map<String, dynamic> patientData,
-    Key? key,
-  }) : super(key: key) {
-    _nombreController.text = patientData['nombre'] ?? '';
-    _apellidoController.text = patientData['apellido'] ?? '';
-    _numeroController.text = patientData['telefono'] ?? '';
-    _correoController.text = patientData['email'] ?? '';
-    _direccionController.text = patientData['direccion'] ?? '';
-
-    // Verificar si 'fechaNacimiento' es un Timestamp antes de convertirlo
-    if (patientData['fechaNacimiento'] is Timestamp) {
-      _fechaNacimiento = (patientData['fechaNacimiento'] as Timestamp).toDate();
-    } else if (patientData['fechaNacimiento'] is DateTime) {
-      _fechaNacimiento = patientData['fechaNacimiento'];
-    } else {
-      _fechaNacimiento =
-          DateTime.now(); // Valor predeterminado si no se encuentra
-    }
-  }
-
-  static final TextEditingController _nombreController =
-      TextEditingController();
-  static final TextEditingController _apellidoController =
-      TextEditingController();
-  static final TextEditingController _direccionController =
-      TextEditingController();
-  static final TextEditingController _numeroController =
-      TextEditingController();
-  static final TextEditingController _correoController =
-      TextEditingController();
-  static DateTime _fechaNacimiento = DateTime.now();
+  UpdatePatient({required this.patientId, required this.patientData});
 
   @override
   _UpdatePatientState createState() => _UpdatePatientState();
 }
 
 class _UpdatePatientState extends State<UpdatePatient> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nombreController;
+  late TextEditingController _apellidoController;
+  late TextEditingController _direccionController;
+  late TextEditingController _telefonoController;
+  late TextEditingController _emailController;
+  DateTime? _fechaNacimiento;
+
   @override
-  void dispose() {
-    UpdatePatient._nombreController.dispose();
-    UpdatePatient._apellidoController.dispose();
-    UpdatePatient._direccionController.dispose();
-    UpdatePatient._numeroController.dispose();
-    UpdatePatient._correoController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _nombreController =
+        TextEditingController(text: widget.patientData['nombre']);
+    _apellidoController =
+        TextEditingController(text: widget.patientData['apellido']);
+    _direccionController =
+        TextEditingController(text: widget.patientData['direccion']);
+    _telefonoController =
+        TextEditingController(text: widget.patientData['telefono']);
+    _emailController = TextEditingController(text: widget.patientData['email']);
+
+    // Convertir Timestamp a DateTime si es necesario
+    if (widget.patientData['fechaNacimiento'] is Timestamp) {
+      _fechaNacimiento =
+          (widget.patientData['fechaNacimiento'] as Timestamp).toDate();
+    } else if (widget.patientData['fechaNacimiento'] is DateTime) {
+      _fechaNacimiento = widget.patientData['fechaNacimiento'];
+    }
   }
 
-  // Función para actualizar el paciente en Firebase
   Future<void> _updatePatient() async {
-    if (_validateInputs()) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('patients')
-            .doc(widget.patientId)
-            .update({
-          'nombre': UpdatePatient._nombreController.text,
-          'apellido': UpdatePatient._apellidoController.text,
-          'direccion': UpdatePatient._direccionController.text,
-          'telefono': UpdatePatient._numeroController.text,
-          'email': UpdatePatient._correoController.text,
-          'fechaNacimiento': UpdatePatient._fechaNacimiento,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+    if (_formKey.currentState!.validate()) {
+      final updatedPatientData = {
+        'id': widget.patientId,
+        'nombre': _nombreController.text,
+        'apellido': _apellidoController.text,
+        'direccion': _direccionController.text,
+        'telefono': _telefonoController.text,
+        'email': _emailController.text,
+        'fechaNacimiento': _fechaNacimiento,
+      };
 
-        // Navegar a la pantalla de Gestión de Pacientes después de actualizar
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GestionPatient(),
-          ),
-        );
-      } catch (e) {
-        print('Error al actualizar paciente: $e');
-      }
+      await FirebaseFirestore.instance
+          .collection('pacientes')
+          .doc(widget.patientId)
+          .update(updatedPatientData);
+
+      // Devuelve los datos actualizados
+      Navigator.pop(context, updatedPatientData);
     }
   }
 
-  bool _validateInputs() {
-    // Validar que todos los campos estén llenos
-    if (UpdatePatient._nombreController.text.isEmpty ||
-        UpdatePatient._apellidoController.text.isEmpty ||
-        UpdatePatient._direccionController.text.isEmpty ||
-        UpdatePatient._numeroController.text.isEmpty ||
-        UpdatePatient._correoController.text.isEmpty) {
-      _showDialog('Por favor, completa todos los campos.');
-      return false;
-    }
-
-    // Validar que el número solo contenga dígitos
-    if (!RegExp(r'^[0-9]+$').hasMatch(UpdatePatient._numeroController.text)) {
-      _showDialog('El número de teléfono solo puede contener dígitos.');
-      return false;
-    }
-
-    // Validar que el correo electrónico contenga un arroba
-    if (!UpdatePatient._correoController.text.contains('@')) {
-      _showDialog('El correo electrónico debe contener un arroba (@).');
-      return false;
-    }
-
-    return true;
-  }
-
-  void _showDialog(String message) {
-    showDialog(
+  Future<void> _selectFechaNacimiento(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('Cerrar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+      initialDate: _fechaNacimiento ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
+    if (picked != null && picked != _fechaNacimiento) {
+      setState(() {
+        _fechaNacimiento = picked;
+      });
+    }
   }
 
   @override
@@ -140,96 +89,113 @@ class _UpdatePatientState extends State<UpdatePatient> {
       drawer: const Menu(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              onPressed: _updatePatient,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: _updatePatient,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Actualizar Paciente'),
+                  ),
+                ],
               ),
-              child: Text('Actualizar Paciente'),
-            ),
-            SizedBox(height: 20),
-            _buildTextField('Nombre', UpdatePatient._nombreController),
-            SizedBox(height: 20),
-            _buildTextField('Apellido', UpdatePatient._apellidoController),
-            SizedBox(height: 20),
-            _buildTextField('Dirección', UpdatePatient._direccionController),
-            SizedBox(height: 20),
-            _buildTextField('Número', UpdatePatient._numeroController,
-                keyboardType: TextInputType.phone),
-            SizedBox(height: 20),
-            _buildTextField('Email', UpdatePatient._correoController),
-            SizedBox(height: 20),
-            _buildDateField(context),
-          ],
+              Text(
+                'Nombre',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _nombreController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Apellido',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _apellidoController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Direccion',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _direccionController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Fecha de Nacimiento',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                readOnly: true,
+                onTap: () => _selectFechaNacimiento(context),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: _fechaNacimiento == null
+                      ? 'Selecciona una fecha'
+                      : '${_fechaNacimiento!.day}/${_fechaNacimiento!.month}/${_fechaNacimiento!.year}',
+                ),
+                validator: (value) =>
+                    _fechaNacimiento == null ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Telefono',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _telefonoController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Email',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Campo obligatorio';
+                  } else if (!value.contains('@')) {
+                    return 'Correo inválido';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // Método para construir un campo de texto
-  Widget _buildTextField(String label, TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: keyboardType,
-        ),
-      ],
-    );
-  }
-
-  // Método para construir el campo de fecha de nacimiento
-  Widget _buildDateField(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Fecha de Nacimiento',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 8),
-        GestureDetector(
-          onTap: () async {
-            DateTime? selectedDate = await showDatePicker(
-              context: context,
-              initialDate: UpdatePatient._fechaNacimiento,
-              firstDate: DateTime(1900),
-              lastDate: DateTime.now(),
-            );
-            if (selectedDate != null &&
-                selectedDate != UpdatePatient._fechaNacimiento) {
-              setState(() {
-                UpdatePatient._fechaNacimiento = selectedDate;
-              });
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '${UpdatePatient._fechaNacimiento.toLocal()}'.split(' ')[0],
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

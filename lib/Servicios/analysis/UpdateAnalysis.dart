@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:laboratorios/Widgets/menu.dart';
 
 class UpdateAnalysis extends StatefulWidget {
-  final String analisisId;
-  final Map<String, dynamic> analisisData;
+  final String AnalysisId;
+  final Map<String, dynamic> AnalysisData;
 
-  UpdateAnalysis({required this.analisisId, required this.analisisData});
+  UpdateAnalysis({required this.AnalysisId, required this.AnalysisData});
 
   @override
   _UpdateAnalysisState createState() => _UpdateAnalysisState();
@@ -14,81 +15,85 @@ class UpdateAnalysis extends StatefulWidget {
 
 class _UpdateAnalysisState extends State<UpdateAnalysis> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController codigoController;
-  late TextEditingController descripcionController;
-  late TextEditingController estadoController;
-  late TextEditingController nombreController;
-  late TextEditingController precioController;
-  late TextEditingController rangoController;
+  late TextEditingController _nombreController;
+  late TextEditingController _descripcionController;
+  late TextEditingController _rangoController;
+  late TextEditingController _precioController;
+  late TextEditingController _estadoController;
+  late TextEditingController _codigoController;
 
   @override
   void initState() {
     super.initState();
-    codigoController =
-        TextEditingController(text: widget.analisisData['codigo']);
-    descripcionController =
-        TextEditingController(text: widget.analisisData['descripcion']);
-    estadoController =
-        TextEditingController(text: widget.analisisData['estado']);
-    nombreController =
-        TextEditingController(text: widget.analisisData['nombre']);
-    precioController =
-        TextEditingController(text: widget.analisisData['precio'].toString());
-    rangoController =
-        TextEditingController(text: widget.analisisData['rango'].toString());
+    _nombreController =
+        TextEditingController(text: widget.AnalysisData['nombre']);
+    _descripcionController =
+        TextEditingController(text: widget.AnalysisData['descripcion']);
+    _rangoController =
+        TextEditingController(text: widget.AnalysisData['rango'].toString());
+    _precioController =
+        TextEditingController(text: widget.AnalysisData['precio'].toString());
+    _estadoController =
+        TextEditingController(text: widget.AnalysisData['estado']);
+    _codigoController =
+        TextEditingController(text: widget.AnalysisData['codigo']);
   }
 
-  Future<void> _updateAnalisis(BuildContext context) async {
+  Future<void> _updateAnalisis() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('analisis')
-            .doc(widget.analisisId)
-            .update({
-          'codigo': codigoController.text,
-          'descripcion': descripcionController.text,
-          'estado': estadoController.text,
-          'nombre': nombreController.text,
-          'precio': int.parse(precioController.text),
-          'rango': int.parse(rangoController.text),
-        });
+      final updatedAnalisisData = {
+        'id': widget.AnalysisId,
+        'nombre': _nombreController.text,
+        'descripcion': _descripcionController.text,
+        'rango': int.parse(_rangoController.text),
+        'precio': int.parse(_precioController.text),
+        'estado': _estadoController.text,
+        'codigo': _codigoController.text,
+      };
 
-        Navigator.pop(context, true);
-      } catch (e) {
-        print('Error al actualizar análisis: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al actualizar análisis')));
-      }
+      await FirebaseFirestore.instance
+          .collection('analisis')
+          .doc(widget.AnalysisId)
+          .update(updatedAnalisisData);
+
+      // Devuelve los datos actualizados
+      Navigator.pop(context, updatedAnalisisData);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Editar Análisis")),
+      appBar: AppBar(
+        title: Text('Actualizar Análisis'),
+      ),
+      drawer: const Menu(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              buildTextField('Código', codigoController),
-              buildTextField('Descripción', descripcionController),
-              buildTextField('Estado', estadoController),
-              buildTextField('Nombre', nombreController),
-              buildNumberField('Precio', precioController),
-              buildNumberField('Rango', rangoController),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _updateAnalisis(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Actualizar Análisis'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: _updateAnalisis,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text('Actualizar Análisis'),
+                  ),
+                ],
               ),
+              buildTextField('Nombre', _nombreController),
+              buildTextField('Descripción', _descripcionController),
+              buildTextField('Estado', _estadoController),
+              buildTextField('Código', _codigoController),
+              buildNumberField('Precio', _precioController),
+              buildNumberField('Rango', _rangoController),
+              SizedBox(height: 20),
             ],
           ),
         ),
@@ -102,8 +107,10 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 8),
           TextFormField(
             controller: controller,
@@ -121,8 +128,10 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 8),
           TextFormField(
             controller: controller,

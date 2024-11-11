@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firestore
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firebase Firestore
 import 'package:laboratorios/Servicios/Patient/CreatePatient.dart';
 import 'package:laboratorios/Servicios/Patient/UpdatePatient.dart';
 import 'package:laboratorios/Servicios/Patient/DeletePatient.dart';
@@ -16,25 +16,29 @@ class _GestionPatientState extends State<GestionPatient> {
   @override
   void initState() {
     super.initState();
-    _fetchPacientes(); // Cargar los pacientes al iniciar
+    fetchPacientesFromFirebase(); // Llama a la función para obtener los datos de Firebase
   }
 
-  Future<void> _fetchPacientes() async {
-    // Obtener datos de Firebase Firestore
-    QuerySnapshot snapshot =
+  // Función para obtener los pacientes de Firebase y asignarlos a la lista 'pacientes'
+  void fetchPacientesFromFirebase() async {
+    final querySnapshot =
         await FirebaseFirestore.instance.collection('pacientes').get();
+    final fetchedPacientes = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] =
+          doc.id; // Guarda el ID del documento para futuras referencias
+
+      // Convertimos 'fechaNacimiento' de Timestamp a DateTime
+      if (data['fechaNacimiento'] is Timestamp) {
+        data['fechaNacimiento'] =
+            (data['fechaNacimiento'] as Timestamp).toDate();
+      }
+
+      return data;
+    }).toList();
+
     setState(() {
-      // Mapear documentos y añadirlos a la lista de pacientes
-      pacientes = snapshot.docs
-          .map((doc) => {
-                'id': doc.id,
-                'nombre': doc['nombre'],
-                'apellido_paterno': doc['apellido'],
-                'direccion': doc['direccion'],
-                'telefono': doc['telefono'],
-                'email': doc['email'],
-              })
-          .toList();
+      pacientes = fetchedPacientes;
     });
   }
 
@@ -53,7 +57,7 @@ class _GestionPatientState extends State<GestionPatient> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Gestión de Pacientes',
+                  '                     ',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
@@ -100,28 +104,43 @@ class _GestionPatientState extends State<GestionPatient> {
                       DataColumn(label: Text('Dirección')),
                       DataColumn(label: Text('Teléfono')),
                       DataColumn(label: Text('Email')),
+                      DataColumn(label: Text('Fecha de Nacimiento')),
                       DataColumn(label: Text('Acciones')),
                     ],
                     rows: pacientes.map<DataRow>((paciente) {
                       return DataRow(cells: [
-                        DataCell(Text(paciente['nombre'])),
-                        DataCell(Text(paciente['apellido'])),
-                        DataCell(Text(paciente['direccion'])),
-                        DataCell(Text(paciente['telefono'])),
-                        DataCell(Text(paciente['email'])),
+                        DataCell(Text(paciente['nombre'] ?? '')),
+                        DataCell(Text(paciente['apellido'] ?? '')),
+                        DataCell(Text(paciente['direccion'] ?? '')),
+                        DataCell(Text(paciente['telefono'] ?? '')),
+                        DataCell(Text(paciente['email'] ?? '')),
+                        DataCell(Text(paciente['fechaNacimiento'] != null
+                            ? '${paciente['fechaNacimiento'].day}/${paciente['fechaNacimiento'].month}/${paciente['fechaNacimiento'].year}'
+                            : '')),
                         DataCell(
                           Row(
                             children: [
                               IconButton(
                                 icon: Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () {
-                                  showDialog(
+                                onPressed: () async {
+                                  final updatedPatient = await showDialog(
                                     context: context,
                                     builder: (context) => UpdatePatient(
                                       patientId: paciente['id'],
                                       patientData: paciente,
                                     ),
                                   );
+
+                                  // Actualiza la lista de pacientes si se devuelve un paciente actualizado
+                                  if (updatedPatient != null) {
+                                    setState(() {
+                                      final index = pacientes.indexWhere((p) =>
+                                          p['id'] == updatedPatient['id']);
+                                      if (index != -1) {
+                                        pacientes[index] = updatedPatient;
+                                      }
+                                    });
+                                  }
                                 },
                               ),
                               IconButton(
@@ -131,6 +150,12 @@ class _GestionPatientState extends State<GestionPatient> {
                                     context: context,
                                     builder: (context) => DeletePatient(
                                       patientId: paciente['id'],
+                                      onDelete: () {
+                                        setState(() {
+                                          pacientes.removeWhere((item) =>
+                                              item['id'] == paciente['id']);
+                                        });
+                                      },
                                     ),
                                   );
                                 },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firebase
 import 'package:laboratorios/Servicios/analysis/CreateAnalysis.dart';
 import 'package:laboratorios/Servicios/analysis/DeleteAnalysis.dart';
 import 'package:laboratorios/Servicios/analysis/UpdateAnalysis.dart';
@@ -10,8 +11,33 @@ class GestionAnalysis extends StatefulWidget {
 }
 
 class _GestionAnalisisState extends State<GestionAnalysis> {
-  List<Map<String, dynamic>> analisisList =
-      []; // Lista para almacenar los datos de los análisis
+  List<Map<String, dynamic>> analisisList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAnalisisData(); // Obtener datos al iniciar
+  }
+
+  // Función para obtener datos de Firebase Firestore
+  Future<void> fetchAnalisisData() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('analisis').get();
+      List<Map<String, dynamic>> fetchedData = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          ...doc.data() as Map<String, dynamic>,
+        };
+      }).toList();
+
+      setState(() {
+        analisisList = fetchedData;
+      });
+    } catch (e) {
+      print('Error al obtener datos: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +54,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Gestión de Análisis',
+                  '                  ',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
@@ -45,13 +71,11 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    // Esperar los datos del análisis devueltos desde CreateAnalisis
                     final newAnalisis = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => CreateAnalysis()),
                     );
 
-                    // Si newAnalisis no es nulo, añadirlo a la lista y actualizar el estado
                     if (newAnalisis != null) {
                       setState(() {
                         analisisList.add(newAnalisis);
@@ -72,20 +96,20 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                 children: [
                   DataTable(
                     columns: [
-                      DataColumn(label: Text('Código')),
                       DataColumn(label: Text('Nombre')),
                       DataColumn(label: Text('Descripción')),
                       DataColumn(label: Text('Estado')),
+                      DataColumn(label: Text('Código')),
                       DataColumn(label: Text('Precio')),
                       DataColumn(label: Text('Rango')),
                       DataColumn(label: Text('Acciones')),
                     ],
                     rows: analisisList.map<DataRow>((analisis) {
                       return DataRow(cells: [
-                        DataCell(Text(analisis['codigo'].toString())),
                         DataCell(Text(analisis['nombre'])),
                         DataCell(Text(analisis['descripcion'])),
                         DataCell(Text(analisis['estado'])),
+                        DataCell(Text(analisis['codigo'].toString())),
                         DataCell(Text('\$${analisis['precio']}')),
                         DataCell(Text('${analisis['rango']}')),
                         DataCell(
@@ -93,14 +117,25 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                             children: [
                               IconButton(
                                 icon: Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () {
-                                  showDialog(
+                                onPressed: () async {
+                                  final updatedAnalysis = await showDialog(
                                     context: context,
                                     builder: (context) => UpdateAnalysis(
-                                      analisisId: analisis['codigo'],
-                                      analisisData: analisis,
+                                      AnalysisId: analisis['id'],
+                                      AnalysisData: analisis,
                                     ),
                                   );
+
+                                  if (updatedAnalysis != null) {
+                                    setState(() {
+                                      final index = analisisList.indexWhere(
+                                          (p) =>
+                                              p['id'] == updatedAnalysis['id']);
+                                      if (index != -1) {
+                                        analisisList[index] = updatedAnalysis;
+                                      }
+                                    });
+                                  }
                                 },
                               ),
                               IconButton(
@@ -109,7 +144,13 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                                   showDialog(
                                     context: context,
                                     builder: (context) => DeleteAnalysis(
-                                      analisisId: analisis['codigo'],
+                                      analisisId: analisis['id'],
+                                      onDelete: () {
+                                        setState(() {
+                                          analisisList.removeWhere((item) =>
+                                              item['id'] == analisis['id']);
+                                        });
+                                      },
                                     ),
                                   );
                                 },
