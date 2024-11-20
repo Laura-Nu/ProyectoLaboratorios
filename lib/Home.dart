@@ -6,7 +6,9 @@ import 'package:printing/printing.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userId;
+
+  const HomePage({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -81,8 +83,8 @@ class _HomePageState extends State<HomePage> {
       }
 
       setState(() {
-        this.totalAnalysis = totalAnalisis;
-        this.totalSales = totalIngresos;
+        totalAnalysis = totalAnalisis;
+        totalSales = totalIngresos;
       });
     } catch (e) {
       print('Error al cargar datos: $e');
@@ -200,7 +202,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('LIA - LAB'),
         backgroundColor: Colors.blue[700],
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -210,7 +212,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Analisis',
+                  'Análisis',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Row(
@@ -223,7 +225,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             SizedBox(height: 20),
-
             Row(
               children: [
                 Text(
@@ -249,7 +250,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -258,7 +258,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             SizedBox(height: 30),
-
             Text(
               'Generar Reporte de Paciente',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -298,7 +297,7 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         width: MediaQuery.of(context).size.width * 0.4,
         height: 120,
-        padding: EdgeInsets.all(12), // Ajustar el padding
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
@@ -307,17 +306,16 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 28), // Reducir tamaño del icono
+            Icon(icon, color: color, size: 28),
             SizedBox(height: 5),
             Text(
               value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color), // Reducir tamaño del texto
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
             ),
-            Text(label, style: TextStyle(color: Colors.grey, fontSize: 12)), // Reducir tamaño del texto
+            Text(label, style: TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
       ),
     );
   }
-
 }
