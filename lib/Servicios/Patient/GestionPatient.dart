@@ -12,23 +12,29 @@ class GestionPatient extends StatefulWidget {
 
 class _GestionPatientState extends State<GestionPatient> {
   List<Map<String, dynamic>> pacientes = [];
+  List<Map<String, dynamic>> pacientesFiltrados = [];
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    fetchPacientesFromFirebase(); // Llama a la función para obtener los datos de Firebase
+    fetchPacientesFromFirebase();
+    searchController.addListener(_filtrarPacientes);
   }
 
-  // Función para obtener los pacientes de Firebase y asignarlos a la lista 'pacientes'
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   void fetchPacientesFromFirebase() async {
     final querySnapshot =
         await FirebaseFirestore.instance.collection('pacientes').get();
     final fetchedPacientes = querySnapshot.docs.map((doc) {
       final data = doc.data();
-      data['id'] =
-          doc.id; // Guarda el ID del documento para futuras referencias
+      data['id'] = doc.id;
 
-      // Convertimos 'fechaNacimiento' de Timestamp a DateTime
       if (data['fechaNacimiento'] is Timestamp) {
         data['fechaNacimiento'] =
             (data['fechaNacimiento'] as Timestamp).toDate();
@@ -39,6 +45,27 @@ class _GestionPatientState extends State<GestionPatient> {
 
     setState(() {
       pacientes = fetchedPacientes;
+      pacientesFiltrados = fetchedPacientes;
+    });
+  }
+
+  void _filtrarPacientes() {
+    String query = searchController.text.toLowerCase();
+
+    setState(() {
+      pacientesFiltrados = pacientes.where((paciente) {
+        return paciente.entries.any((entry) {
+          if (entry.value is String) {
+            return entry.value.toLowerCase().contains(query);
+          } else if (entry.value is DateTime) {
+            final fecha = entry.value as DateTime;
+            return '${fecha.day}/${fecha.month}/${fecha.year}'.contains(query);
+          } else if (entry.value is num) {
+            return entry.value.toString().contains(query);
+          }
+          return false;
+        });
+      }).toList();
     });
   }
 
@@ -46,7 +73,7 @@ class _GestionPatientState extends State<GestionPatient> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('GESTION DE PACIENTES'),
+        title: Text('GESTIÓN DE PACIENTES'),
       ),
       drawer: const Menu(),
       body: Padding(
@@ -57,12 +84,13 @@ class _GestionPatientState extends State<GestionPatient> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '                     ',
+                  '',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   width: 200,
                   child: TextField(
+                    controller: searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar...',
                       prefixIcon: Icon(Icons.search),
@@ -82,6 +110,7 @@ class _GestionPatientState extends State<GestionPatient> {
                     if (newPatient != null) {
                       setState(() {
                         pacientes.add(newPatient);
+                        pacientesFiltrados.add(newPatient);
                       });
                     }
                   },
@@ -98,27 +127,125 @@ class _GestionPatientState extends State<GestionPatient> {
               child: ListView(
                 children: [
                   DataTable(
+                    columnSpacing: 20,
+                    dataRowHeight: 60,
+                    headingRowHeight: 50,
                     columns: [
-                      DataColumn(label: Text('Nombres')),
-                      DataColumn(label: Text('Apellido')),
-                      DataColumn(label: Text('Dirección')),
-                      DataColumn(label: Text('Teléfono')),
-                      DataColumn(label: Text('Email')),
-                      DataColumn(label: Text('Fecha de Nacimiento')),
-                      DataColumn(label: Text('Acciones')),
+                      DataColumn(
+                        label: Text(
+                          'NOMBRES',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'APELLIDO PATERNO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'APELLIDO MATERNO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'DIRECCIÓN',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'TELÉFONO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'EMAIL',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'FECHA NACIMIENTO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'ACCIONES',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
-                    rows: pacientes.map<DataRow>((paciente) {
+                    rows: pacientesFiltrados.map<DataRow>((paciente) {
                       return DataRow(cells: [
-                        DataCell(Text(paciente['nombre'] ?? '')),
-                        DataCell(Text(paciente['apellido'] ?? '')),
-                        DataCell(Text(paciente['direccion'] ?? '')),
-                        DataCell(Text(paciente['telefono'] ?? '')),
-                        DataCell(Text(paciente['email'] ?? '')),
-                        DataCell(Text(paciente['fechaNacimiento'] != null
-                            ? '${paciente['fechaNacimiento'].day}/${paciente['fechaNacimiento'].month}/${paciente['fechaNacimiento'].year}'
-                            : '')),
+                        DataCell(Container(
+                            width: 100, child: Text(paciente['nombre'] ?? ''))),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(
+                              paciente['apellido'] ?? '',
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(
+                              paciente['apellidoMaterno'] ?? '',
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(
+                              paciente['direccion'] ?? '',
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(
+                              paciente['telefono'] ?? '',
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: 100,
+                            child: Text(
+                              paciente['email'] ?? '',
+                              textAlign: TextAlign.start,
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Center(
+                            child: Text(
+                              paciente['fechaNacimiento'] != null
+                                  ? '${paciente['fechaNacimiento'].day}/${paciente['fechaNacimiento'].month}/${paciente['fechaNacimiento'].year}'
+                                  : '',
+                            ),
+                          ),
+                        ),
                         DataCell(
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               IconButton(
                                 icon: Icon(Icons.edit, color: Colors.blue),
@@ -131,13 +258,13 @@ class _GestionPatientState extends State<GestionPatient> {
                                     ),
                                   );
 
-                                  // Actualiza la lista de pacientes si se devuelve un paciente actualizado
                                   if (updatedPatient != null) {
                                     setState(() {
                                       final index = pacientes.indexWhere((p) =>
                                           p['id'] == updatedPatient['id']);
                                       if (index != -1) {
                                         pacientes[index] = updatedPatient;
+                                        _filtrarPacientes();
                                       }
                                     });
                                   }
@@ -154,6 +281,7 @@ class _GestionPatientState extends State<GestionPatient> {
                                         setState(() {
                                           pacientes.removeWhere((item) =>
                                               item['id'] == paciente['id']);
+                                          _filtrarPacientes();
                                         });
                                       },
                                     ),

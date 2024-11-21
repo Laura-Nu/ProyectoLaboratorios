@@ -17,47 +17,57 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nombreController;
   late TextEditingController _descripcionController;
-  late TextEditingController _rangoController;
+  late TextEditingController _inicioRangoController;
+  late TextEditingController _finRangoController;
+  late TextEditingController _unidadRangoController;
   late TextEditingController _precioController;
   late TextEditingController _codigoController;
 
-  String? _estadoSeleccionado; // Para manejar el estado seleccionado
+  String? _estadoSeleccionado;
 
   @override
   void initState() {
     super.initState();
+    // Conversión de valores numéricos a String y manejo de nulos
     _nombreController =
-        TextEditingController(text: widget.AnalysisData['nombre']);
+        TextEditingController(text: widget.AnalysisData['nombre'] ?? '');
     _descripcionController =
-        TextEditingController(text: widget.AnalysisData['descripcion']);
-    _rangoController =
-        TextEditingController(text: widget.AnalysisData['rango'].toString());
-    _precioController =
-        TextEditingController(text: widget.AnalysisData['precio'].toString());
+        TextEditingController(text: widget.AnalysisData['descripcion'] ?? '');
+    _inicioRangoController = TextEditingController(
+        text: widget.AnalysisData['rango_inicio']?.toString() ?? '');
+    _finRangoController = TextEditingController(
+        text: widget.AnalysisData['rango_fin']?.toString() ?? '');
+    _unidadRangoController = TextEditingController(
+        text: widget.AnalysisData['rango']?.toString() ?? '');
+    _precioController = TextEditingController(
+        text: widget.AnalysisData['precio']?.toString() ?? '');
     _codigoController =
-        TextEditingController(text: widget.AnalysisData['codigo']);
-    _estadoSeleccionado =
-        widget.AnalysisData['estado']; // Inicializa el estado actual
+        TextEditingController(text: widget.AnalysisData['codigo'] ?? '');
+    _estadoSeleccionado = widget.AnalysisData['estado'];
   }
 
   Future<void> _updateAnalisis() async {
     if (_formKey.currentState!.validate()) {
+      // Manejo de posibles conversiones erróneas con int.tryParse
       final updatedAnalisisData = {
         'id': widget.AnalysisId,
         'nombre': _nombreController.text,
         'descripcion': _descripcionController.text,
-        'rango': int.parse(_rangoController.text),
-        'precio': int.parse(_precioController.text),
+        'rango_inicio': int.tryParse(_inicioRangoController.text) ?? 0,
+        'rango_fin': int.tryParse(_finRangoController.text) ?? 0,
+        'rango': int.tryParse(_unidadRangoController.text) ?? 0,
+        'precio': int.tryParse(_precioController.text) ?? 0,
         'estado': _estadoSeleccionado,
         'codigo': _codigoController.text,
       };
 
+      // Actualización en Firebase
       await FirebaseFirestore.instance
           .collection('analisis')
           .doc(widget.AnalysisId)
           .update(updatedAnalisisData);
 
-      // Devuelve los datos actualizados
+      // Regresar a la pantalla anterior con los datos actualizados
       Navigator.pop(context, updatedAnalisisData);
     }
   }
@@ -66,7 +76,7 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ACTUALIZAR ANALISIS'),
+        title: Text('ACTUALIZAR ANÁLISIS'),
       ),
       drawer: const Menu(),
       body: Padding(
@@ -89,11 +99,13 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
                 ],
               ),
               buildTextField('NOMBRE', _nombreController),
-              buildTextField('DESCRIPCION', _descripcionController),
-              buildDropdownField(), // Cambiar por combobox
-              buildTextField('CODIGO', _codigoController),
+              buildTextField('DESCRIPCIÓN', _descripcionController),
+              buildDropdownField(),
+              // buildTextField('CÓDIGO', _codigoController),
+              buildNumberField('INICIO DE RANGO', _inicioRangoController),
+              buildNumberField('FIN DE RANGO', _finRangoController),
+              buildNumberField('RANGO', _unidadRangoController),
               buildNumberField('PRECIO', _precioController),
-              buildNumberField('RANGO', _rangoController),
               SizedBox(height: 20),
             ],
           ),
@@ -108,10 +120,8 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          Text(label,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 8),
           TextFormField(
             controller: controller,
@@ -129,10 +139,8 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          Text(label,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 8),
           TextFormField(
             controller: controller,
@@ -152,10 +160,8 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'ESTADO',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          Text('ESTADO',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _estadoSeleccionado,

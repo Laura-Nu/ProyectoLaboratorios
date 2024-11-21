@@ -13,6 +13,8 @@ class _CreatePatientState extends State<CreatePatient> {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController apellidoPaternoController =
       TextEditingController();
+  final TextEditingController apellidoMaternoController =
+      TextEditingController();
   final TextEditingController direccionController = TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController correoController = TextEditingController();
@@ -29,6 +31,7 @@ class _CreatePatientState extends State<CreatePatient> {
             await FirebaseFirestore.instance.collection('pacientes').add({
           'nombre': nombreController.text,
           'apellido': apellidoPaternoController.text,
+          'apellidoMaterno': apellidoMaternoController.text,
           'direccion': direccionController.text,
           'telefono': telefonoController.text,
           'email': correoController.text,
@@ -41,6 +44,7 @@ class _CreatePatientState extends State<CreatePatient> {
           'id': docRef.id,
           'nombre': nombreController.text,
           'apellido': apellidoPaternoController.text,
+          'apellidoMaterno': apellidoMaternoController.text,
           'direccion': direccionController.text,
           'telefono': telefonoController.text,
           'email': correoController.text,
@@ -122,6 +126,18 @@ class _CreatePatientState extends State<CreatePatient> {
               SizedBox(height: 8),
               TextFormField(
                 controller: apellidoPaternoController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'APELLIDO MATERNO',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: apellidoMaternoController,
                 decoration: InputDecoration(border: OutlineInputBorder()),
                 validator: (value) =>
                     value!.isEmpty ? 'Campo obligatorio' : null,

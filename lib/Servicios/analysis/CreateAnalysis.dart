@@ -54,11 +54,9 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
           'estado': estadoSeleccionado,
           'nombre': nombreController.text,
           'precio': int.parse(precioController.text),
-          'rango': {
-            'inicio': int.parse(inicioRangoController.text),
-            'fin': int.parse(finRangoController.text),
-            'unidad': unidadRangoController.text,
-          },
+          'rango_inicio': int.parse(inicioRangoController.text),
+          'rango_fin': int.parse(finRangoController.text),
+          'rango': int.parse(unidadRangoController.text),
           'timestamp': FieldValue.serverTimestamp(),
         });
 
@@ -70,11 +68,9 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
           'estado': estadoSeleccionado,
           'nombre': nombreController.text,
           'precio': int.parse(precioController.text),
-          'rango': {
-            'inicio': int.parse(inicioRangoController.text),
-            'fin': int.parse(finRangoController.text),
-            'unidad': unidadRangoController.text,
-          },
+          'rango_inicio': int.parse(inicioRangoController.text),
+          'rango_fin': int.parse(finRangoController.text),
+          'rango': int.parse(unidadRangoController.text),
         };
 
         Navigator.pop(context, newAnalisis);
@@ -90,7 +86,7 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AGREGAR NUEVO ANALISIS'),
+        title: Text('AGREGAR NUEVO ANÁLISIS'),
       ),
       drawer: const Menu(),
       body: Padding(
@@ -115,12 +111,12 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
                 ],
               ),
               buildTextField('NOMBRE', nombreController),
-              buildTextField('DESCRIPCION', descripcionController),
+              buildTextField('DESCRIPCIÓN', descripcionController),
               buildDropdownField(),
               buildNumberField('PRECIO', precioController),
               buildNumberField('INICIO DE RANGO', inicioRangoController),
               buildNumberField('FIN DE RANGO', finRangoController),
-              buildTextField('UNIDAD', unidadRangoController),
+              buildTextField('RANGO', unidadRangoController),
               SizedBox(height: 20),
             ],
           ),

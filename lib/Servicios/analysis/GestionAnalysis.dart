@@ -12,11 +12,21 @@ class GestionAnalysis extends StatefulWidget {
 
 class _GestionAnalisisState extends State<GestionAnalysis> {
   List<Map<String, dynamic>> analisisList = [];
+  List<Map<String, dynamic>> filteredList = [];
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchAnalisisData(); // Obtener datos al iniciar
+    searchController
+        .addListener(_filterAnalisis); // Escuchar cambios en el buscador
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   // Función para obtener datos de Firebase Firestore
@@ -33,17 +43,36 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
 
       setState(() {
         analisisList = fetchedData;
+        filteredList = fetchedData; // Inicialmente, mostrar todos los datos
       });
     } catch (e) {
       print('Error al obtener datos: $e');
     }
   }
 
+  // Función para filtrar análisis
+  void _filterAnalisis() {
+    String query = searchController.text.toLowerCase();
+
+    setState(() {
+      filteredList = analisisList.where((analisis) {
+        return analisis.entries.any((entry) {
+          if (entry.value is String) {
+            return entry.value.toLowerCase().contains(query);
+          } else if (entry.value is num) {
+            return entry.value.toString().contains(query);
+          }
+          return false;
+        });
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gestión de Análisis'),
+        title: Text('GESTIÓN DE ANÁLISIS'),
       ),
       drawer: const Menu(),
       body: Padding(
@@ -54,12 +83,13 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '                  ',
+                  '',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   width: 200,
                   child: TextField(
+                    controller: searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar...',
                       prefixIcon: Icon(Icons.search),
@@ -79,6 +109,8 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                     if (newAnalisis != null) {
                       setState(() {
                         analisisList.add(newAnalisis);
+                        filteredList
+                            .add(newAnalisis); // Actualizar lista filtrada
                       });
                     }
                   },
@@ -95,23 +127,78 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
               child: ListView(
                 children: [
                   DataTable(
+                    columnSpacing: 20,
+                    dataRowHeight: 60,
                     columns: [
-                      DataColumn(label: Text('Nombre')),
-                      DataColumn(label: Text('Descripción')),
-                      DataColumn(label: Text('Estado')),
-                      // DataColumn(label: Text('Código')),
-                      DataColumn(label: Text('Precio')),
-                      DataColumn(label: Text('Rango')),
-                      DataColumn(label: Text('Acciones')),
+                      DataColumn(
+                        label: Text(
+                          'NOMBRE',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'DESCRIPCIÓN',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'ESTADO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'PRECIO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'RANGO INICIO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'RANGO FIN',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'RANGO',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'ACCIONES',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
-                    rows: analisisList.map<DataRow>((analisis) {
+                    rows: filteredList.map<DataRow>((analisis) {
                       return DataRow(cells: [
-                        DataCell(Text(analisis['nombre'])),
-                        DataCell(Text(analisis['descripcion'])),
-                        DataCell(Text(analisis['estado'])),
-                        //  DataCell(Text(analisis['codigo'].toString())),
-                        DataCell(Text('\Bs ${analisis['precio']}')),
-                        DataCell(Text('${analisis['rango']}')),
+                        DataCell(Text(analisis['nombre'] ?? '')),
+                        DataCell(
+                          SizedBox(
+                            width: 180, // Ancho fijo para evitar desbordes
+                            child: Text(
+                              analisis['descripcion'] ?? '',
+                              softWrap: true,
+                            ),
+                          ),
+                        ),
+                        DataCell(Text(analisis['estado'] ?? '')),
+                        DataCell(
+                            Text('Bs${analisis['precio']?.toString() ?? '0'}')),
+                        DataCell(Text(
+                            analisis['rango_inicio']?.toString() ?? 'N/A')),
+                        DataCell(
+                            Text(analisis['rango_fin']?.toString() ?? 'N/A')),
+                        DataCell(Text(analisis['rango']?.toString() ?? 'N/A')),
                         DataCell(
                           Row(
                             children: [
@@ -133,6 +220,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                                               p['id'] == updatedAnalysis['id']);
                                       if (index != -1) {
                                         analisisList[index] = updatedAnalysis;
+                                        _filterAnalisis(); // Actualizar la lista filtrada
                                       }
                                     });
                                   }
@@ -149,6 +237,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                                         setState(() {
                                           analisisList.removeWhere((item) =>
                                               item['id'] == analisis['id']);
+                                          _filterAnalisis(); // Actualizar la lista filtrada
                                         });
                                       },
                                     ),

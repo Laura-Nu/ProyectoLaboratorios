@@ -17,6 +17,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nombreController;
   late TextEditingController _apellidoController;
+  late TextEditingController _apellidoMaternoController;
   late TextEditingController _direccionController;
   late TextEditingController _telefonoController;
   late TextEditingController _emailController;
@@ -29,6 +30,8 @@ class _UpdatePatientState extends State<UpdatePatient> {
         TextEditingController(text: widget.patientData['nombre']);
     _apellidoController =
         TextEditingController(text: widget.patientData['apellido']);
+    _apellidoMaternoController =
+        TextEditingController(text: widget.patientData['apellidoMaterno']);
     _direccionController =
         TextEditingController(text: widget.patientData['direccion']);
     _telefonoController =
@@ -50,6 +53,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
         'id': widget.patientId,
         'nombre': _nombreController.text,
         'apellido': _apellidoController.text,
+        'apellidoMaterno': _apellidoMaternoController.text,
         'direccion': _direccionController.text,
         'telefono': _telefonoController.text,
         'email': _emailController.text,
@@ -125,6 +129,18 @@ class _UpdatePatientState extends State<UpdatePatient> {
               SizedBox(height: 8),
               TextFormField(
                 controller: _apellidoController,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                validator: (value) =>
+                    value!.isEmpty ? 'Campo obligatorio' : null,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'APELLIDO MATERNO',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _apellidoMaternoController,
                 decoration: InputDecoration(border: OutlineInputBorder()),
                 validator: (value) =>
                     value!.isEmpty ? 'Campo obligatorio' : null,
