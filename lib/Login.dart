@@ -181,10 +181,15 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     hintText: 'NOMBRE DE USUARIO',
                                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                                    counterText: "",
                                   ),
+                                  maxLength: 5,
                                   validator: (value) {
+                                    final validCharacters = RegExp(r'^[a-zA-Z0-9]+$');
                                     if (value == null || value.isEmpty) {
                                       return 'Ingrese su nombre de usuario';
+                                    } else if (!validCharacters.hasMatch(value)) {
+                                      return 'Caracteres Especiales NO Permitidos';
                                     }
                                     return null;
                                   },
