@@ -33,17 +33,13 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
           await FirebaseFirestore.instance.collection('pacientes').get();
       setState(() {
         _pacientesList = pacientesSnapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>?;
-          if (data != null) {
-            final nombre = data['nombre'] ?? '';
-            final apellido =
-                data.containsKey('apellido') ? data['apellido'] : '';
-            return {
-              'id': doc.id,
-              'nombreCompleto': '$nombre $apellido',
-            };
-          }
-          return {'id': '', 'nombreCompleto': ''};
+          final data = doc.data() as Map<String, dynamic>? ?? {};
+          final nombre = data['nombre'] ?? '';
+          final apellido = data['apellido'] ?? '';
+          return {
+            'id': doc.id,
+            'nombreCompleto': '$nombre $apellido',
+          };
         }).toList();
       });
     } catch (e) {
@@ -59,7 +55,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
         _analisisDataList = analisisSnapshot.docs
             .map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              if (data['estado'] == 'activo') {
+              if (data['estado'] == 'Activo') {
                 return {
                   'codigo': data['codigo'] ?? '',
                   'nombre': data['nombre'] ?? '',

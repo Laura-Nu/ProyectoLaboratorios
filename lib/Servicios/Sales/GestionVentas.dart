@@ -19,6 +19,9 @@ class _GestionVentasState extends State<GestionVentas> {
   List<Map<String, dynamic>> ventas = [];
   List<Map<String, dynamic>> filteredVentas = [];
 
+  Map<String, String> pacientesCache = {};
+  Map<String, String> analisisCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -26,69 +29,103 @@ class _GestionVentasState extends State<GestionVentas> {
     searchController.addListener(_onSearchChanged);
   }
 
-  Future<void> loadSalesData() async {
+Future<void> loadSalesData() async {
   try {
-    // Cargar todos los documentos de "pacientes" y "analisis" de una vez y almacenarlos en un mapa
-    QuerySnapshot pacientesSnapshot = await FirebaseFirestore.instance.collection('pacientes').get();
-    Map<String, Map<String, dynamic>> pacientesMap = {
-      for (var doc in pacientesSnapshot.docs) doc.id: doc.data() as Map<String, dynamic>
-    };
+    print("Iniciando carga de datos...");
 
-    QuerySnapshot analisisSnapshot = await FirebaseFirestore.instance.collection('analisis').get();
-    Map<String, String> analisisMap = {
-      for (var doc in analisisSnapshot.docs) doc['codigo']: doc['nombre'] ?? 'Análisis Desconocido'
-    };
+    // Cargar datos de pacientes y análisis en caché
+    print("Cargando cachés de pacientes y análisis...");
+    await Future.wait([_loadPacientesCache(), _loadAnalisisCache()]);
+    print("Cachés cargados: ${pacientesCache.length} pacientes, ${analisisCache.length} análisis.");
 
-    // Cargar todas las ventas en las que "estadoPago" sea true
-    QuerySnapshot detalleVentasSnapshot = await FirebaseFirestore.instance.collection('detalleventa').get();
+    // Cargar todas las ventas en batch
+    print("Consultando datos de 'ventas'...");
+    QuerySnapshot<Map<String, dynamic>> ventasSnapshot = await FirebaseFirestore.instance
+        .collection('ventas')
+        .where('estadoPago', isEqualTo: true)
+        .get();
+    Map<String, Map<String, dynamic>> ventasMap = {
+      for (var venta in ventasSnapshot.docs) venta.id: venta.data()
+    };
+    print("Ventas cargadas: ${ventasMap.length}");
+
+    // Consultar datos de 'detalleventa'
+    print("Consultando datos de 'detalleventa'...");
+    QuerySnapshot<Map<String, dynamic>> detalleVentasSnapshot = await FirebaseFirestore.instance
+        .collection('detalleventa')
+        .get();
+    print("Documentos encontrados en 'detalleventa': ${detalleVentasSnapshot.docs.length}");
+
+    // Procesar datos
     List<Map<String, dynamic>> salesList = [];
-
     for (var detalleDoc in detalleVentasSnapshot.docs) {
-      var detalleData = detalleDoc.data() as Map<String, dynamic>;
+      final Map<String, dynamic> detalleData = detalleDoc.data();
 
+      // Obtener idVenta y verificar que exista en el mapa de ventas
       String? idVenta = detalleData['idVenta'];
+      if (idVenta != null && ventasMap.containsKey(idVenta)) {
+        String pacienteId = detalleData['idPaciente'] ?? '';
+        List<dynamic> idAnalisisList = detalleData['idAnalisis'] ?? [];
+        double subtotal = detalleData['subtotal'] ?? 0.0;
 
-      if (idVenta != null && idVenta.isNotEmpty) {
-        DocumentSnapshot ventaSnapshot = await FirebaseFirestore.instance.collection('ventas').doc(idVenta).get();
-        if (ventaSnapshot.exists && ventaSnapshot.get('estadoPago') == true) {
-          // Obtener el ID del paciente y el listado de análisis
-          String pacienteId = detalleData['idPaciente'] ?? '';
-          List<dynamic> idAnalisisList = detalleData['idAnalisis'] ?? [];
-          double subtotal = detalleData['subtotal'];
+        // Obtener nombres desde la caché
+        String pacienteNombreCompleto = pacientesCache[pacienteId] ?? 'Desconocido';
+        List<String> analisisList = idAnalisisList
+            .map((codigo) => analisisCache[codigo.toString()] ?? 'Análisis Desconocido')
+            .toList();
 
-          // Obtener el nombre completo del paciente desde el mapa de caché
-          String pacienteNombreCompleto = 'Desconocido';
-          if (pacientesMap.containsKey(pacienteId)) {
-            var pacienteData = pacientesMap[pacienteId]!;
-            pacienteNombreCompleto = '${pacienteData['nombre'] ?? 'Desconocido'} ${pacienteData['apellido'] ?? ''}'.trim();
-          }
-
-          // Obtener los nombres de análisis desde el mapa de caché
-          List<String> analisisList = idAnalisisList
-              .map((codigo) => analisisMap[codigo.toString()] ?? 'Análisis Desconocido')
-              .toList();
-
-          // Añadir la venta a la lista solo si estadoPago es true
-          salesList.add({
-            'nombre': pacienteNombreCompleto,
-            'analisis': analisisList.join(', '),
-            'total': subtotal,
-            'ventaId': idVenta,
-            'pacienteId': pacienteId,
-          });
-        }
+        salesList.add({
+          'nombre': pacienteNombreCompleto,
+          'analisis': analisisList.join(', '),
+          'total': subtotal,
+          'ventaId': idVenta,
+          'pacienteId': pacienteId,
+        });
       }
     }
 
+    // Actualizar el estado con los datos procesados
     setState(() {
       ventas = salesList;
-      filteredVentas = salesList; // Inicialmente, la lista filtrada contiene todas las ventas.
+      filteredVentas = ventas;
     });
+    print("Datos cargados correctamente: ${ventas.length} ventas.");
   } catch (e) {
     print('Error al cargar datos de ventas: $e');
   }
 }
 
+  Future<void> _loadPacientesCache() async {
+    try {
+      QuerySnapshot pacientesSnapshot =
+          await FirebaseFirestore.instance.collection('pacientes').get();
+      for (var doc in pacientesSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          String nombreCompleto =
+              '${data['nombre']} ${data['apellido'] ?? ''}'.trim();
+          pacientesCache[doc.id] = nombreCompleto;
+        }
+      }
+    } catch (e) {
+      print('Error al cargar pacientes: $e');
+    }
+  }
+
+  Future<void> _loadAnalisisCache() async {
+    try {
+      QuerySnapshot analisisSnapshot =
+          await FirebaseFirestore.instance.collection('analisis').get();
+      for (var doc in analisisSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          analisisCache[data['codigo']] = data['nombre'] ?? 'Desconocido';
+        }
+      }
+    } catch (e) {
+      print('Error al cargar análisis: $e');
+    }
+  }
 
   void _onSearchChanged() {
     setState(() {
@@ -102,22 +139,11 @@ class _GestionVentasState extends State<GestionVentas> {
 
   Future<void> _deleteVenta(String ventaId) async {
     try {
-      // Verifica si el documento de "ventas" existe
-      DocumentSnapshot ventaSnapshot = await FirebaseFirestore.instance.collection('ventas').doc(ventaId).get();
-
-      if (ventaSnapshot.exists) {
-        // Actualizar el estado de la venta en la colección "ventas" a false
-        await FirebaseFirestore.instance.collection('ventas').doc(ventaId).update({
-          'estadoPago': false,
-        });
-
-        print('Venta eliminada correctamente');
-
-        // Recargar los datos para actualizar la vista después de eliminar
-        await loadSalesData();
-      } else {
-        print('Error: Documento de ventas con ID $ventaId no encontrado.');
-      }
+      await FirebaseFirestore.instance.collection('ventas').doc(ventaId).update({
+        'estadoPago': false,
+      });
+      print('Venta eliminada correctamente');
+      await loadSalesData();
     } catch (e) {
       print('Error al eliminar la venta: $e');
     }
@@ -250,7 +276,6 @@ class _GestionVentasState extends State<GestionVentas> {
                                     icon: Icon(Icons.edit),
                                     color: Colors.blue,
                                     onPressed: () {
-                                      // Aquí pasamos los IDs necesarios
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -345,7 +370,7 @@ class _GestionVentasState extends State<GestionVentas> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                _deleteVenta(ventaId); // Elimina la venta y recarga los datos en tiempo real
+                _deleteVenta(ventaId);
               },
               child: Text('Confirmar'),
             ),

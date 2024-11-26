@@ -59,7 +59,7 @@ class _UpdateAnalisisState extends State<UpdateAnalisis> {
         _analisisDataList = analisisSnapshot.docs
             .map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              if (data['estado'] == 'activo') {
+              if (data['estado'] == 'Activo') {
                 return {
                   'codigo': data['codigo'] ?? '',
                   'nombre': data['nombre'] ?? '',
@@ -94,7 +94,6 @@ Future<void> _loadVentaData() async {
 
       // Buscar el nombre del paciente basado en el ID del paciente
       if (_selectedPacienteId != null && _selectedPacienteId!.isNotEmpty) {
-        print("Cargando datos del paciente con ID: $_selectedPacienteId");
         DocumentSnapshot pacienteSnapshot = await FirebaseFirestore.instance
             .collection('pacientes')
             .doc(_selectedPacienteId)
@@ -114,7 +113,6 @@ Future<void> _loadVentaData() async {
 
       // Obtener los códigos de análisis desde el detalle de venta
       List<dynamic> idAnalisisList = detalleData['idAnalisis'] ?? [];
-      print("Códigos de análisis encontrados: $idAnalisisList");
 
       // Cargar los resultados desde la colección "ventas"
       DocumentSnapshot ventaSnapshot = await FirebaseFirestore.instance
@@ -127,12 +125,10 @@ Future<void> _loadVentaData() async {
       List<dynamic> resultadosList = (data != null && data['resultados'] is List)
           ? data['resultados'] as List<dynamic>
           : [];
-      print("Resultados cargados: $resultadosList");
 
       // Construir la lista de análisis para el grid
       List<Map<String, dynamic>> analisisTempList = [];
       for (var codigo in idAnalisisList) {
-        print("Buscando análisis con código: $codigo");
         QuerySnapshot analisisSnapshot = await FirebaseFirestore.instance
             .collection('analisis')
             .where('codigo', isEqualTo: codigo.toString())
@@ -152,10 +148,7 @@ Future<void> _loadVentaData() async {
             'precio': analisisData['precio'] ?? 0.0,
             'resultado': resultadoExistente?['resultado'] ?? '', // Valor predeterminado si no hay resultado
           });
-
-          print(
-              "Análisis encontrado: ${analisisData['nombre']}, Precio: ${analisisData['precio']}, Resultado: ${resultadoExistente?['resultado'] ?? ''}");
-        } else {
+          } else {
           // En caso de no encontrar el análisis, añadir una entrada genérica
           analisisTempList.add({
             'analisis': 'Análisis Desconocido',
@@ -207,47 +200,100 @@ Future<void> _loadVentaData() async {
   }
 
   Future<void> _updateVentaData() async {
-    try {
-      QuerySnapshot detalleVentaQuery = await FirebaseFirestore.instance
-          .collection('detalleventa')
-          .where('idVenta', isEqualTo: widget.ventaId)
-          .get();
-
-      if (detalleVentaQuery.docs.isNotEmpty) {
-        DocumentSnapshot detalleVentaSnapshot = detalleVentaQuery.docs.first;
-
-        final detalleData = detalleVentaSnapshot.data() as Map<String, dynamic>;
-        String detalleVentaId = detalleVentaSnapshot.id;
-
-        await FirebaseFirestore.instance.collection('ventas').doc(widget.ventaId).update({
-          'idPaciente': _selectedPacienteId,
-          'total': _analisisList.fold<double>(0.0, (double sum, item) => sum + (item['precio'] ?? 0.0)),
-          'resultados': _analisisList.map((item) {
-            return {
-              'analisis': item['analisis'],
-              'resultado': item['resultado'] ?? '',
-            };
-          }).toList(),
-        });
-
-        await FirebaseFirestore.instance.collection('detalleventa').doc(detalleVentaId).update({
-          'idPaciente': _selectedPacienteId,
-          'idAnalisis': _analisisList.map((item) {
-            final analisisData = _analisisDataList.firstWhere(
-              (analisis) => analisis['nombre'] == item['analisis'],
-              orElse: () => {'codigo': ''},
-            );
-            return analisisData['codigo'] ?? '';
-          }).toList(),
-          'subtotal': _analisisList.fold<double>(0.0, (double sum, item) => sum + (item['precio'] ?? 0.0)),
-        });
-
-        _showConfirmationModal('Datos actualizados correctamente');
-      }
-    } catch (e) {
-      print('Error al actualizar los datos: $e');
+  try {
+    // Validar que todos los campos de resultado estén llenos
+    bool hasEmptyResults = _analisisList.any((analisis) => (analisis['resultado'] ?? '').isEmpty);
+    if (hasEmptyResults) {
+      _showErrorModal('Por favor, complete todos los campos de resultado antes de actualizar.');
+      return;
     }
+
+    // Obtener el detalle de venta relacionado con la ventaId
+    QuerySnapshot detalleVentaQuery = await FirebaseFirestore.instance
+        .collection('detalleventa')
+        .where('idVenta', isEqualTo: widget.ventaId)
+        .get();
+
+    if (detalleVentaQuery.docs.isNotEmpty) {
+      DocumentSnapshot detalleVentaSnapshot = detalleVentaQuery.docs.first;
+
+      final detalleData = detalleVentaSnapshot.data() as Map<String, dynamic>;
+      String detalleVentaId = detalleVentaSnapshot.id;
+
+      // Actualizar la colección "ventas"
+      await FirebaseFirestore.instance.collection('ventas').doc(widget.ventaId).update({
+        'idPaciente': _selectedPacienteId,
+        'total': _analisisList.fold<double>(0.0, (double sum, item) => sum + (item['precio'] ?? 0.0)),
+        'resultados': _analisisList.map((item) {
+          return {
+            'analisis': item['analisis'],
+            'resultado': item['resultado'] ?? '',
+          };
+        }).toList(),
+      });
+
+      // Actualizar la colección "detalleventa"
+      await FirebaseFirestore.instance.collection('detalleventa').doc(detalleVentaId).update({
+        'idPaciente': _selectedPacienteId,
+        'idAnalisis': _analisisList.map((item) {
+          final analisisData = _analisisDataList.firstWhere(
+            (analisis) => analisis['nombre'] == item['analisis'],
+            orElse: () => {'codigo': ''},
+          );
+          return analisisData['codigo'] ?? '';
+        }).toList(),
+        'subtotal': _analisisList.fold<double>(0.0, (double sum, item) => sum + (item['precio'] ?? 0.0)),
+      });
+
+      // Mostrar modal de confirmación
+      _showConfirmationModal('Datos actualizados correctamente');
+    } else {
+      _showErrorModal('No se encontró el detalle de venta relacionado con la venta seleccionada.');
+    }
+  } catch (e) {
+    print('Error al actualizar los datos: $e');
+    _showErrorModal('Ocurrió un error al intentar actualizar los datos. Por favor, inténtelo de nuevo.');
   }
+}
+
+void _showErrorModal(String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red, size: 40),
+            SizedBox(width: 10),
+            Text(
+              'ERROR',
+              style: TextStyle(color: Colors.red, fontSize: 22),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: Color(0xFF54595E), fontSize: 16),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Aceptar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   void _showConfirmationModal(String message) {
     showDialog(
