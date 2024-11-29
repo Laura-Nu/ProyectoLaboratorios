@@ -5,16 +5,26 @@ class BarChartWidget extends StatelessWidget {
   final List<double> analysisCounts;
   final double maxY;
   final List<String> analysisNamesList;
+  final bool isLoading;  // Agregar propiedad para verificar si los datos están cargando
 
   const BarChartWidget({
     Key? key,
     required this.analysisCounts,
     required this.maxY,
     required this.analysisNamesList,
+    this.isLoading = false,  // Por defecto, el indicador de carga es falso
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      // Mostrar el CircularProgressIndicator si está cargando
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // Si no está cargando, mostrar el gráfico de barras
     double containerWidth = MediaQuery.of(context).size.width;
     int numberOfBars = analysisCounts.length;
     double dynamicWidth = (containerWidth / numberOfBars) * 0.4;
@@ -45,7 +55,7 @@ class BarChartWidget extends StatelessWidget {
                 int index = value.toInt();
                 if (index < analysisNamesList.length) {
                   return Transform.rotate(
-                    angle: -0.3, 
+                    angle: -0.0,
                     child: Text(
                       analysisNamesList[index],
                       style: TextStyle(fontSize: 10),
@@ -54,13 +64,13 @@ class BarChartWidget extends StatelessWidget {
                 }
                 return const SizedBox.shrink();
               },
-              reservedSize: 32,
+              reservedSize: 40,
             ),
           ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 40,
+              reservedSize: 45,
               getTitlesWidget: (double value, TitleMeta meta) {
                 return Text(value.toInt().toString());
               },
