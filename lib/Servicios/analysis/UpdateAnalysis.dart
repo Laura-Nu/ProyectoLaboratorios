@@ -74,11 +74,12 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
 
   @override
   Widget build(BuildContext context) {
+    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('ACTUALIZAR ANÁLISIS'),
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

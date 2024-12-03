@@ -6,6 +6,11 @@ import 'package:laboratorios/Servicios/analysis/UpdateAnalysis.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class GestionAnalysis extends StatefulWidget {
+
+  final String userId;
+
+  const GestionAnalysis({Key? key, required this.userId}) : super(key: key);
+
   @override
   _GestionAnalisisState createState() => _GestionAnalisisState();
 }
@@ -70,11 +75,12 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
 
   @override
   Widget build(BuildContext context) {
+    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('GESTIÓN DE ANÁLISIS'),
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -103,7 +109,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                   onPressed: () async {
                     final newAnalisis = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreateAnalysis()),
+                      MaterialPageRoute(builder: (context) => CreateAnalysis(userId: userId,)),
                     );
 
                     if (newAnalisis != null) {

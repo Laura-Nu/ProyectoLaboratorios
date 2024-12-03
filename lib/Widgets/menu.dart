@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
-import 'package:laboratorios/Servicios/analysis/GestionAnalysis.dart';
 import 'package:laboratorios/Login.dart';
 
 class Menu extends StatelessWidget {
-  const Menu({super.key});
+  final String userId;
 
+  const Menu({Key? key, required this.userId}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -16,6 +16,7 @@ class Menu extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
+            
             _buildDrawerItem(
               icon: Icons.menu,
               title: 'NAVEGADOR',
@@ -34,7 +35,7 @@ class Menu extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => interfazUsuario()),
+                  MaterialPageRoute(builder: (context) => InterfazUsuario(userId: userId)),
                 );
               },
               textColor: Colors.white,
@@ -45,31 +46,21 @@ class Menu extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => GestionVentas()),
+                  MaterialPageRoute(builder: (context) => GestionVentas(userId: userId)),
                 );
               },
               textColor: Colors.white,
             ),
             _buildDrawerItem(
               icon: Icons.design_services,
-              title: 'PACIENTES',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => GestionPatient()),
-                );
-              },
+              title: 'SERVICIOS',
+              onTap: () => Navigator.pushReplacementNamed(context, '/servicios'),
               textColor: Colors.white,
             ),
             _buildDrawerItem(
               icon: Icons.shopping_cart,
-              title: 'ANALISIS',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => GestionAnalysis()),
-                );
-              },
+              title: 'COMPRAS',
+              onTap: () => Navigator.pushReplacementNamed(context, '/compras'),
               textColor: Colors.white,
             ),
             _buildDrawerItem(
@@ -85,42 +76,44 @@ class Menu extends StatelessWidget {
                 _showLogoutConfirmationDialog(context);
               },
               textColor: Colors.white,
-            ),
+            ),  
+
           ],
         ),
       ),
     );
   }
-
   void _showLogoutConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmación'),
-          content: Text('¿Estás seguro de que deseas cerrar sesión?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                ); // Navega al LoginPage
-              },
-              child: Text('Cerrar sesión'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Confirmación'),
+        content: Text('¿Estás seguro de que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); 
+            },
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+  onPressed: () {
+    Navigator.of(context).pop(); 
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    ); // Navega al LoginPage
+  },
+  child: Text('Cerrar sesión'),
+),
+
+        ],
+      );
+    },
+  );
+}
+
 
   Widget _buildDrawerItem({
     required IconData icon,

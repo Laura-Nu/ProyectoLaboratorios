@@ -7,6 +7,7 @@ class UpdatePatient extends StatefulWidget {
   final String patientId;
   final Map<String, dynamic> patientData;
 
+
   UpdatePatient({required this.patientId, required this.patientData});
 
   @override
@@ -86,11 +87,12 @@ class _UpdatePatientState extends State<UpdatePatient> {
 
   @override
   Widget build(BuildContext context) {
+    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('ACTUALIZAR PACIENTE'),
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -1,171 +1,196 @@
 import 'package:flutter/material.dart';
-import 'package:laboratorios/Servicios/User/UsuarioUpdate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'UsuarioUpdate.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
-void main() {
-  runApp(interfazUsuario());
-}
+class InterfazUsuario extends StatefulWidget {
+  final String userId;
 
-class interfazUsuario extends StatefulWidget {
+  const InterfazUsuario({Key? key, required this.userId}) : super(key: key);
+
   @override
-  _interfazUsuarioState createState() => _interfazUsuarioState();
+  _InterfazUsuarioState createState() => _InterfazUsuarioState();
 }
 
-class _interfazUsuarioState extends State<interfazUsuario> {
+class _InterfazUsuarioState extends State<InterfazUsuario> {
   bool _isPasswordVisible = false;
+  Map<String, dynamic>? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userData = userDoc.data() as Map<String, dynamic>;
+        });
+      } else {
+        print('Usuario no encontrado');
+      }
+    } catch (e) {
+      print('Error al cargar datos del usuario: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, 
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'DATOS PERSONALES',
-            style: TextStyle(color: Colors.white, fontSize: 24),
-          ),
-          backgroundColor: Color(0xFF5B7FCE), 
-          iconTheme: IconThemeData(color: Colors.white),
-          elevation: 0,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'DATOS PERSONALES',
+          style: TextStyle(color: Colors.white, fontSize: 24),
         ),
-        drawer: const Menu(),
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Center( 
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 130.0), 
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center, 
-                      children: [
-                        _buildLabelWithBorder('NOMBRE DE USUARIO:'),
-                        _buildLabelWithBorder('NOMBRE:'),
-                        _buildLabelWithBorder('APELLIDOS:'),
-                        _buildLabelWithBorder('CARNET DE IDENTIFICACIÓN:'),
-                        _buildLabelWithBorder('FECHA DE NACIMIENTO:'),
-                        _buildLabelWithBorder('DIRECCIÓN:'),
-                        _buildLabelWithBorder('CORREO ELECTRÓNICO:'),
-                        _buildPasswordField('CONTRASEÑA:'), 
-                        _buildLabelWithBorder('TELÉFONO:'),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15.0), 
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 200, 
-                                child: Text(
-                                  'GÉNERO:',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              Row(
+        backgroundColor: const Color(0xFF5B7FCE),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      drawer: Menu(userId: widget.userId), // Pasar userId al menú
+      body: userData == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 130.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildLabelWithBorder('NOMBRE:', userData!['nombre'] ?? ''),
+                            _buildLabelWithBorder('NOMBRE DE USUARIO:', userData!['nombreUsuario'] ?? ''),
+                            _buildLabelWithBorder('APELLIDOS:', userData!['apellido'] ?? ''),
+                            _buildLabelWithBorder('CARNET DE IDENTIFICACIÓN:', userData!['carnet'] ?? ''),
+                            _buildLabelWithBorder('FECHA DE NACIMIENTO:', userData!['fechaNacimiento'] ?? ''),
+                            _buildLabelWithBorder('DIRECCIÓN:', userData!['direccion'] ?? ''),
+                            _buildLabelWithBorder('CORREO ELECTRÓNICO:', userData!['email'] ?? ''),
+                            _buildPasswordField('CONTRASEÑA:', userData!['password'] ?? ''),
+                            _buildLabelWithBorder('TELÉFONO:', userData!['telefono'] ?? ''),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 15.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  _buildRadioOption('MASCULINO', true),
-                                  SizedBox(width: 20), 
-                                  _buildRadioOption('FEMENINO', false),
+                                  Container(
+                                    width: 200,
+                                    child: const Text(
+                                      'GÉNERO:',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      _buildRadioOption('MASCULINO', userData!['genero'] == 'MASCULINO'),
+                                      const SizedBox(width: 20),
+                                      _buildRadioOption('FEMENINO', userData!['genero'] == 'FEMENINO'),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 40.0, right: 40.0),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF5B7FCE), 
-                    foregroundColor: Colors.white,     
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10), 
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UsuarioUpdate(),
-                  ),
-                );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Text(
-                      'ACTUALIZAR DATOS',
-                      style: TextStyle(fontSize: 16),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0, right: 40.0),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B7FCE),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UsuarioUpdate(userId: widget.userId),
+                          ),
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Text(
+                          'ACTUALIZAR DATOS',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildLabelWithBorder(String label) {
+  Widget _buildLabelWithBorder(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0), 
+      padding: const EdgeInsets.only(top: 15.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 200, 
+            width: 200,
             child: Text(
               label,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           Container(
-            width: 1000, 
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+            width: 1000,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 2), 
-              borderRadius: BorderRadius.circular(15), 
+              border: Border.all(color: Colors.black, width: 2),
+              borderRadius: BorderRadius.circular(15),
             ),
-            child: Text(''), 
+            child: Text(value, style: const TextStyle(fontSize: 16)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPasswordField(String label) {
+  Widget _buildPasswordField(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0), 
+      padding: const EdgeInsets.only(top: 15.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 200, 
+            width: 200,
             child: Text(
               label,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           Container(
-            width: 1000, 
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+            width: 1000,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 2), 
-              borderRadius: BorderRadius.circular(15), 
+              border: Border.all(color: Colors.black, width: 2),
+              borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
               children: [
-                // Mostrar u ocultar la contraseña
                 Expanded(
                   child: Text(
-                    _isPasswordVisible ? 'miContraseñaEjemplo' : '************', 
-                    style: TextStyle(fontSize: 16),
+                    _isPasswordVisible ? value : '************',
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 IconButton(
@@ -194,10 +219,10 @@ class _interfazUsuarioState extends State<interfazUsuario> {
         Radio(
           value: selected,
           groupValue: true,
-          activeColor: Color(0xFF5B7FCE), // Color igual al del navbar
+          activeColor: const Color(0xFF5B7FCE),
           onChanged: (bool? value) {},
         ),
-        Text(label, style: TextStyle(fontSize: 16)),
+        Text(label, style: const TextStyle(fontSize: 16)),
       ],
     );
   }

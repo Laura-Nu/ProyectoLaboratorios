@@ -18,6 +18,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   intl: ^0.17.0 # Dependencia intl añadida para formatear fechas
   fl_chart: 0.69.0
+  screenshot: ^1.0.0
+  dropdown_search: "^5.0.5"
+  path_provider: ^2.0.9
+  open_file: ^3.2.1 
 
 dev_dependencies:
   flutter_test:
@@ -28,5 +32,13 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Bold.ttf
     - assets/images/lab_background.jpeg
     - assets/images/logoMicro.png
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf

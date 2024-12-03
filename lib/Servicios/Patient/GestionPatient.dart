@@ -6,6 +6,10 @@ import 'package:laboratorios/Servicios/Patient/DeletePatient.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class GestionPatient extends StatefulWidget {
+  final String userId;
+
+  const GestionPatient({Key? key, required this.userId}) : super(key: key);
+
   @override
   _GestionPatientState createState() => _GestionPatientState();
 }
@@ -71,11 +75,12 @@ class _GestionPatientState extends State<GestionPatient> {
 
   @override
   Widget build(BuildContext context) {
+    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('GESTIÓN DE PACIENTES'),
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -104,7 +109,7 @@ class _GestionPatientState extends State<GestionPatient> {
                   onPressed: () async {
                     final newPatient = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreatePatient()),
+                      MaterialPageRoute(builder: (context) => CreatePatient(userId: userId,)),
                     );
 
                     if (newPatient != null) {

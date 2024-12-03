@@ -4,6 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class CreateAnalysis extends StatefulWidget {
+
+  final String userId;
+
+  const CreateAnalysis({Key? key, required this.userId}) : super(key: key);
+
+
   @override
   _CreateAnalysisState createState() => _CreateAnalysisState();
 }
@@ -84,11 +90,12 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
 
   @override
   Widget build(BuildContext context) {
+    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('AGREGAR NUEVO ANÁLISIS'),
       ),
-      drawer: const Menu(),
+      drawer: Menu(userId: userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
