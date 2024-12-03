@@ -3,6 +3,7 @@ import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'package:laboratorios/Servicios/analysis/GestionAnalysis.dart';
+import 'package:laboratorios/Login.dart';
 
 class Menu extends StatelessWidget {
   const Menu({super.key});
@@ -79,16 +80,45 @@ class Menu extends StatelessWidget {
             ),
             _buildDrawerItem(
               icon: Icons.logout,
-              title: 'Log Up',
+              title: 'Log Out',
               onTap: () {
-                // Implementar lógica de cierre de sesión
-                Navigator.pushReplacementNamed(context, '/login');
+                _showLogoutConfirmationDialog(context);
               },
               textColor: Colors.white,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmación'),
+          content: Text('¿Estás seguro de que deseas cerrar sesión?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                ); // Navega al LoginPage
+              },
+              child: Text('Cerrar sesión'),
+            ),
+          ],
+        );
+      },
     );
   }
 

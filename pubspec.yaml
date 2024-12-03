@@ -28,4 +28,5 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
+    - assets/images/lab_background.jpeg
+    - assets/images/logoMicro.png
