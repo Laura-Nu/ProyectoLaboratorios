@@ -6,9 +6,7 @@ import 'package:laboratorios/Servicios/analysis/GestionAnalysis.dart';
 import 'package:laboratorios/Login.dart';
 
 class Menu extends StatelessWidget {
-  final String userId;
-
-  const Menu({Key? key, required this.userId}) : super(key: key);
+  const Menu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +34,7 @@ class Menu extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => InterfazUsuario(userId: userId)),
+                  MaterialPageRoute(builder: (context) => interfazUsuario()),
                 );
               },
               textColor: Colors.white,
@@ -47,7 +45,7 @@ class Menu extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => GestionVentas(userId: userId)),
+                  MaterialPageRoute(builder: (context) => GestionVentas()),
                 );
               },
               textColor: Colors.white,
