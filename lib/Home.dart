@@ -12,7 +12,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'Widgets/line_chart_widget.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userId;
+
+  const HomePage({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -729,6 +731,7 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
+      drawer: Menu(userId: widget.userId),
       body: Stack(
         children: [
           SingleChildScrollView(

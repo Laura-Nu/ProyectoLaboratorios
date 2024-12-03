@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'package:laboratorios/Login.dart';
+import 'package:laboratorios/Home.dart';
+import 'package:laboratorios/screens/reportes.dart';
 
 class Menu extends StatelessWidget {
   final String userId;
@@ -26,7 +28,12 @@ class Menu extends StatelessWidget {
             _buildDrawerItem(
               icon: Icons.home,
               title: 'HOME',
-              onTap: () => Navigator.pushReplacementNamed(context, '/home'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
+                );
+              },
               textColor: Colors.white,
             ),
             _buildDrawerItem(
@@ -66,7 +73,12 @@ class Menu extends StatelessWidget {
             _buildDrawerItem(
               icon: Icons.report,
               title: 'REPORTES',
-              onTap: () => Navigator.pushReplacementNamed(context, '/reportes'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ReportPage()),
+                );
+              },
               textColor: Colors.white,
             ),
             _buildDrawerItem(

@@ -21,6 +21,7 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
+  // update el firesstore
   Future<void> _updatePassword() async {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
@@ -40,6 +41,7 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
     });
 
     try {
+      // serchuser
       var userDoc = await FirebaseFirestore.instance
           .collection('superadmin')
           .where('Email', isEqualTo: widget.email)
@@ -47,11 +49,13 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
           .get();
 
       if (userDoc.docs.isNotEmpty) {
+        //ssi  encuentra aluser update
         await FirebaseFirestore.instance
             .collection('superadmin')
-            .doc(userDoc.docs.first.id)
+            .doc(userDoc.docs.first.id) // id  del doc  encontrado
             .update({'Contraseña': newPassword});
 
+        
         _showSuccessDialog('Contraseña actualizada correctamente');
       } else {
         _showErrorDialog('Error Usuario NO encontrado.');
@@ -65,6 +69,7 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
     }
   }
 
+  
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -81,19 +86,21 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
     );
   }
 
+  
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ÉXITO'),
+        title: const Text('EXITO'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); 
+              
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+                MaterialPageRoute(builder: (context) => LoginPage()), 
               );
             },
             child: const Text('Aceptar'),
@@ -105,14 +112,10 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
 
   @override
   Widget build(BuildContext context) {
-    
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Establecer Nueva Contraseña'),
-        backgroundColor: const Color.fromARGB(255, 245, 245, 247),
+        backgroundColor: const Color(0xFF1a237e),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -126,97 +129,62 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
           ),
         ),
         child: Center(
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: screenWidth * 0.6, 
-                minHeight: screenHeight * 0.6, 
-              ),
-              child: Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const SizedBox(height: 20),
-                      Icon(
-                        Icons.lock_reset,
-                        size: 64,
-                        color: Color(0xFF1a237e),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Establece tu nueva contraseña',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1a237e),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      TextField(
-                        controller: _newPasswordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Nueva Contraseña',
-                          prefixIcon: Icon(Icons.lock),
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      TextField(
-                        controller: _confirmPasswordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Confirmar Contraseña',
-                          prefixIcon: Icon(Icons.lock),
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Container(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _updatePassword,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1a237e),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text(
-                                  'Actualizar Contraseña',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+          child: Card(
+            margin: const EdgeInsets.all(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Establece tu nueva contraseña',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _newPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Nueva Contraseña',
+                      prefixIcon: Icon(Icons.lock),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirmar Contraseña',
+                      prefixIcon: Icon(Icons.lock),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _updatePassword,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1a237e),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text('Actualizar Contraseña'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
