@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'login.dart';
+import 'screens/reportes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
