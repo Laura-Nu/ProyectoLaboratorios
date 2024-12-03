@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home.dart';
+import 'package:laboratorios/Widgets/menu.dart';
 import 'recoverPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -71,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
           });
         }
       }
+      
     }
   }
 

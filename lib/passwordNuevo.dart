@@ -129,7 +129,7 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: screenWidth * 0.85, 
+                maxWidth: screenWidth * 0.6, 
                 minHeight: screenHeight * 0.6, 
               ),
               child: Card(

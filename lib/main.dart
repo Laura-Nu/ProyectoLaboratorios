@@ -47,7 +47,7 @@ class FirebaseService {
   static Future<bool> testConnection() async {
     try {
       await _firestore.collection('usuarios').limit(1).get();
-      print('Conexion a Firebase exitosa');
+      //print('Conexion a Firebase exitosa');
       return true;
     } catch (e) {
       print('Error en la conexion a Firebase: $e');
