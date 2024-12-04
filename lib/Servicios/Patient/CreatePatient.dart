@@ -86,12 +86,11 @@ class _CreatePatientState extends State<CreatePatient> {
 
   @override
   Widget build(BuildContext context) {
-    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('AGREGAR NUEVO PACIENTE'),
       ),
-      drawer: Menu(userId: userId,),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -4,6 +4,8 @@ import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'package:laboratorios/Login.dart';
 import 'package:laboratorios/Home.dart';
 import 'package:laboratorios/screens/reportes.dart';
+import 'package:laboratorios/Servicios/Patient/GestionPatient.dart';
+import 'package:laboratorios/Servicios/analysis/GestionAnalysis.dart';
 
 class Menu extends StatelessWidget {
   final String userId;
@@ -77,6 +79,28 @@ class Menu extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ReportPage()),
+                );
+              },
+              textColor: Colors.white,
+            ),
+            _buildDrawerItem(
+              icon: Icons.person,
+              title: 'PACIENTES',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GestionPatient(userId: userId)),
+                );
+              },
+              textColor: Colors.white,
+            ),
+            _buildDrawerItem(
+              icon: Icons.analytics,
+              title: 'ANALISIS',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GestionAnalysis(userId: userId)),
                 );
               },
               textColor: Colors.white,

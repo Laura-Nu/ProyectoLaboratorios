@@ -6,9 +6,10 @@ import 'package:laboratorios/Widgets/menu.dart';
 class UpdatePatient extends StatefulWidget {
   final String patientId;
   final Map<String, dynamic> patientData;
+  final String userId;
 
 
-  UpdatePatient({required this.patientId, required this.patientData});
+  UpdatePatient({required this.patientId, required this.patientData, required this.userId});
 
   @override
   _UpdatePatientState createState() => _UpdatePatientState();
@@ -87,12 +88,11 @@ class _UpdatePatientState extends State<UpdatePatient> {
 
   @override
   Widget build(BuildContext context) {
-    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('ACTUALIZAR PACIENTE'),
       ),
-      drawer: Menu(userId: userId,),
+      drawer: Menu(userId: widget.userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

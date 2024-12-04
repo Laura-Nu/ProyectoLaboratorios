@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class UpdateAnalysis extends StatefulWidget {
+
   final String AnalysisId;
   final Map<String, dynamic> AnalysisData;
+  final String userId;
 
-  UpdateAnalysis({required this.AnalysisId, required this.AnalysisData});
+  UpdateAnalysis({required this.AnalysisId, required this.AnalysisData, required this.userId});
 
   @override
   _UpdateAnalysisState createState() => _UpdateAnalysisState();
@@ -74,12 +76,11 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
 
   @override
   Widget build(BuildContext context) {
-    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('ACTUALIZAR ANÁLISIS'),
       ),
-      drawer: Menu(userId: userId,),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -9,7 +9,6 @@ class CreateAnalysis extends StatefulWidget {
 
   const CreateAnalysis({Key? key, required this.userId}) : super(key: key);
 
-
   @override
   _CreateAnalysisState createState() => _CreateAnalysisState();
 }
@@ -90,12 +89,11 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
 
   @override
   Widget build(BuildContext context) {
-    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('AGREGAR NUEVO ANÁLISIS'),
       ),
-      drawer: Menu(userId: userId,),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -6,9 +6,11 @@ import 'package:laboratorios/Servicios/Patient/DeletePatient.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class GestionPatient extends StatefulWidget {
+  
   final String userId;
 
   const GestionPatient({Key? key, required this.userId}) : super(key: key);
+
 
   @override
   _GestionPatientState createState() => _GestionPatientState();
@@ -75,12 +77,11 @@ class _GestionPatientState extends State<GestionPatient> {
 
   @override
   Widget build(BuildContext context) {
-    var userId;
     return Scaffold(
       appBar: AppBar(
         title: Text('GESTIÓN DE PACIENTES'),
       ),
-      drawer: Menu(userId: userId,),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -109,12 +110,12 @@ class _GestionPatientState extends State<GestionPatient> {
                   onPressed: () async {
                     final newPatient = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreatePatient(userId: userId,)),
+                      MaterialPageRoute(builder: (context) => CreatePatient(userId: widget.userId,)),
                     );
 
                     if (newPatient != null) {
                       setState(() {
-                        pacientes.add(newPatient);
+                      //  pacientes.add(newPatient);
                         pacientesFiltrados.add(newPatient);
                       });
                     }
@@ -258,6 +259,7 @@ class _GestionPatientState extends State<GestionPatient> {
                                   final updatedPatient = await showDialog(
                                     context: context,
                                     builder: (context) => UpdatePatient(
+                                      userId: widget.userId,
                                       patientId: paciente['id'],
                                       patientData: paciente,
                                     ),
