@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:laboratorios/widgets/statistic_card.dart';
+import 'package:laboratorios/widgets/bar_chart.dart';
+import 'package:laboratorios/widgets/patient_table.dart';
+import 'package:laboratorios/widgets/menu.dart';
+import 'package:laboratorios/Login.dart';
+import 'dart:html' as html;
+>>>>>>> Stashed changes
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class HomePage extends StatefulWidget {
+<<<<<<< Updated upstream
   const HomePage({super.key});
+=======
+  final String userId;
+  final String userRole;
+
+  const HomePage({Key? key, required this.userId,required this.userRole}) : super(key: key);
+>>>>>>> Stashed changes
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -200,6 +216,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('LIA - LAB'),
         backgroundColor: Colors.blue[700],
       ),
+<<<<<<< Updated upstream
       drawer: const Menu(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -208,6 +225,15 @@ class _HomePageState extends State<HomePage> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+=======
+      drawer: Menu(userId: widget.userId, userRol: widget.userRole),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+>>>>>>> Stashed changes
               children: [
                 Text(
                   'Analisis',

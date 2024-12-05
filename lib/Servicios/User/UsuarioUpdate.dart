@@ -3,6 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 
 class UsuarioUpdate extends StatefulWidget {
+<<<<<<< Updated upstream
+=======
+  final String userId;
+  final String userRole;
+
+  const UsuarioUpdate({Key? key, required this.userId, required this.userRole}) : super(key: key);
+
+>>>>>>> Stashed changes
   @override
   _UsuarioUpdateState createState() => _UsuarioUpdateState();
 }
@@ -19,7 +27,114 @@ class _UsuarioUpdateState extends State<UsuarioUpdate> {
 
   DateTime? _selectedDate;
 
+<<<<<<< Updated upstream
   final _formKey = GlobalKey<FormState>(); 
+=======
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+Future<void> loadUserData() async {
+  try {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(widget.userId)
+        .get();
+
+    if (userDoc.exists) {
+      var userData = userDoc.data() as Map<String, dynamic>;
+      setState(() {
+        _nombreController.text = userData['nombre'] ?? '';
+        _nombreUsuarioController.text = userData['nombreUsuario'] ?? '';
+        _apellidoController.text = userData['apellido'] ?? '';
+        _carnetController.text = userData['carnet'] ?? '';
+        _fechaNacimientoController.text = userData['fechaNacimiento'] ?? '';
+        _direccionController.text = userData['direccion'] ?? '';
+        _emailController.text = userData['email'] ?? '';
+        _passwordController.text = userData['password'] ?? '';
+        _telefonoController.text = userData['telefono'] ?? '';
+        if (userData['genero'] != null && (userData['genero'] == 'MASCULINO' || userData['genero'] == 'FEMENINO')) {
+          _selectedGender = userData['genero'];
+        }
+
+        if (userData['fechaNacimiento'] != null) {
+          _selectedDate = DateFormat('dd/MM/yyyy').parse(userData['fechaNacimiento']);
+        }
+      });
+    }
+  } catch (e) {
+    print('Error al cargar datos del usuario: $e');
+  }
+}
+
+  Future<void> updateUserData() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(widget.userId)
+            .update({
+          'nombre': _nombreController.text,
+          'nombreUsuario': _nombreUsuarioController.text,
+          'apellido': _apellidoController.text,
+          'carnet': _carnetController.text,
+          'fechaNacimiento': _fechaNacimientoController.text,
+          'direccion': _direccionController.text,
+          'email': _emailController.text,
+          'password': _passwordController.text,
+          'telefono': _telefonoController.text,
+          'genero': _selectedGender,
+        });
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InterfazUsuario(userId: widget.userId, userRole: widget.userRole),
+          ),
+        );
+      } catch (e) {
+        print('Error al actualizar datos del usuario: $e');
+      }
+    }
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo)\.com$');
+    
+    // Verifica que el email coincida con el patrón y que no contenga espacios.
+    if (!emailRegex.hasMatch(email) || email.contains(' ')) {
+      return false;
+    }
+
+    return true;
+  }
+
+
+
+  bool _isValidPassword(String password) {  
+    final passwordRegex = RegExp(
+        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+    return passwordRegex.hasMatch(password);
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = _selectedDate ?? DateTime.now();
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now().subtract(Duration(days: 1)),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _fechaNacimientoController.text = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
+  }
+>>>>>>> Stashed changes
 
   @override
   Widget build(BuildContext context) {

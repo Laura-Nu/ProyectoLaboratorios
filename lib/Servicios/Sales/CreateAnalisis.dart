@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 
 class CreateAnalisis extends StatefulWidget {
+<<<<<<< Updated upstream
+=======
+  final String userId;
+  final String userRole;
+
+  const CreateAnalisis({Key? key, required this.userId, required this.userRole}) : super(key: key);
+
+>>>>>>> Stashed changes
   @override
   _CrearAnalisisState createState() => _CrearAnalisisState();
 }
@@ -34,6 +42,94 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
     });
   }
 
+<<<<<<< Updated upstream
+=======
+  Future<void> _crearVenta() async {
+    if (_selectedPacienteId == null || _analisisList.isEmpty) {
+      print('Debe seleccionar un paciente y al menos un análisis.');
+      return;
+    }
+
+    try {
+      // Calcular el total del precio de los análisis seleccionados
+      double total =
+          _analisisList.fold(0, (sum, item) => sum + item['precio']);
+
+      // Crear el documento de venta
+      DocumentReference ventaRef =
+          await FirebaseFirestore.instance.collection('ventas').add({
+        'estadoPago': true,
+        'fechaVenta': Timestamp.now(),
+        'idPaciente': _selectedPacienteId,
+        'userId': widget.userId,
+        'total': total,
+      });
+
+      // Crear el documento de detalle de venta
+      await FirebaseFirestore.instance.collection('detalleventa').add({
+        'idPaciente': _selectedPacienteId,
+        'idVenta': ventaRef.id,
+        'idAnalisis': _analisisList.map((analisis) => analisis['codigo']).toList(),
+        'subtotal': total,
+      });
+
+      // Mostrar un modal de confirmación
+      _mostrarModalConfirmacion();
+    } catch (e) {
+      print('Error al crear la venta: $e');
+    }
+  }
+
+  void _mostrarModalConfirmacion() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.blue),
+              SizedBox(width: 10),
+              Text(
+                'VENTA EXITOSA',
+                style: TextStyle(
+                  color: Color(0xFF54595E),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Los datos se han guardado correctamente.',
+            style: TextStyle(
+              color: Color(0xFF54595E),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF5B7FCE),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GestionVentas(userId: widget.userId, userRole: widget.userRole),
+                  ),
+                );
+              },
+              child: Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(

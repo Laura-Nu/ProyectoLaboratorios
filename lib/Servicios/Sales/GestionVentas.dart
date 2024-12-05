@@ -6,6 +6,14 @@ import 'package:laboratorios/Servicios/Sales/ViewAnalisis.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
 class GestionVentas extends StatefulWidget {
+<<<<<<< Updated upstream
+=======
+  final String userId;
+  final String userRole;
+
+  const GestionVentas({Key? key, required this.userId,required this.userRole}) : super(key: key);
+
+>>>>>>> Stashed changes
   @override
   _GestionVentasState createState() => _GestionVentasState();
 }
@@ -25,7 +33,11 @@ class _GestionVentasState extends State<GestionVentas> {
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
+<<<<<<< Updated upstream
       drawer: const Menu(),
+=======
+      drawer: Menu(userId: widget.userId,userRol: widget.userRole),
+>>>>>>> Stashed changes
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -58,11 +70,19 @@ class _GestionVentasState extends State<GestionVentas> {
                     ),
                     onPressed: () {
                       Navigator.push(
+<<<<<<< Updated upstream
                   context,
                   MaterialPageRoute(
                     builder: (context) => CreateAnalisis(), // Navegar a GestionVentas.dart
                   ),
                 );
+=======
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateAnalisis(userId: widget.userId, userRole: widget.userRole),
+                        ),
+                      );
+>>>>>>> Stashed changes
                     },
                     child: Text(
                       'CREAR DATOS',
@@ -142,11 +162,23 @@ class _GestionVentasState extends State<GestionVentas> {
                                     color: Colors.blue,
                                     onPressed: () {
                                       Navigator.push(
+<<<<<<< Updated upstream
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => UpdateAnalisis(), // Navegar a GestionVentas.dart
                                       ),
                                     );
+=======
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => UpdateAnalisis(
+                                            ventaId: venta['ventaId'],
+                                            userId: widget.userId,
+                                            userRole: widget.userRole,
+                                          ),
+                                        ),
+                                      );
+>>>>>>> Stashed changes
                                     },
                                   ),
                                   IconButton(

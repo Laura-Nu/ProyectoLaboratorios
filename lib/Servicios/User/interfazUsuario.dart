@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/User/UsuarioUpdate.dart';
 import 'package:laboratorios/Widgets/menu.dart';
 
+<<<<<<< Updated upstream
 void main() {
   runApp(interfazUsuario());
+=======
+class InterfazUsuario extends StatefulWidget {
+  final String userId;
+  final String userRole;
+
+  const InterfazUsuario({Key? key, required this.userId, required this.userRole}) : super(key: key);
+
+  @override
+  _InterfazUsuarioState createState() => _InterfazUsuarioState();
+>>>>>>> Stashed changes
 }
 
 class interfazUsuario extends StatefulWidget {
@@ -28,6 +39,7 @@ class _interfazUsuarioState extends State<interfazUsuario> {
           iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
         ),
+<<<<<<< Updated upstream
         drawer: const Menu(),
         body: Column(
           children: [
@@ -61,13 +73,72 @@ class _interfazUsuarioState extends State<interfazUsuario> {
                                 ),
                               ),
                               Row(
+=======
+        backgroundColor: const Color(0xFF5B7FCE),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      drawer: Menu(userId: widget.userId,userRol: widget.userRole), // Pasar userId al menú
+      body: userData == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 130.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildLabelWithBorder('NOMBRE:', userData!['nombre'] ?? ''),
+                            _buildLabelWithBorder('NOMBRE DE USUARIO:', userData!['nombreUsuario'] ?? ''),
+                            _buildLabelWithBorder('APELLIDOS:', userData!['apellido'] ?? ''),
+                            _buildLabelWithBorder('CARNET DE IDENTIFICACIÓN:', userData!['carnet'] ?? ''),
+                            _buildLabelWithBorder('FECHA DE NACIMIENTO:', userData!['fechaNacimiento'] ?? ''),
+                            _buildLabelWithBorder('DIRECCIÓN:', userData!['direccion'] ?? ''),
+                            _buildLabelWithBorder('CORREO ELECTRÓNICO:', userData!['email'] ?? ''),
+                            _buildPasswordField('CONTRASEÑA:', userData!['password'] ?? ''),
+                            _buildLabelWithBorder('TELÉFONO:', userData!['telefono'] ?? ''),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 15.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+>>>>>>> Stashed changes
                                 children: [
                                   _buildRadioOption('MASCULINO', true),
                                   SizedBox(width: 20), 
                                   _buildRadioOption('FEMENINO', false),
                                 ],
                               ),
+<<<<<<< Updated upstream
                             ],
+=======
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40.0, right: 40.0),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B7FCE),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UsuarioUpdate(userId: widget.userId, userRole: widget.userRole),
+>>>>>>> Stashed changes
                           ),
                         ),
                       ],

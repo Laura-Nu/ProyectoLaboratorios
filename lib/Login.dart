@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+<<<<<<< Updated upstream
 import 'home.dart';
 import 'package:laboratorios/Widgets/menu.dart';
+=======
+import 'Home.dart';
+import 'package:laboratorios/widgets/menu.dart';
+>>>>>>> Stashed changes
 import 'recoverPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,6 +17,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  String userRol = '';
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -24,12 +30,61 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+<<<<<<< Updated upstream
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+=======
+ Future<bool> _loginAsSuperAdmin() async {
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Consulta en la colección 'superadmin' con el nombre de usuario y la contraseña
+      final QuerySnapshot result = await FirebaseFirestore.instance
+          .collection('superadmin')
+          .where('Nombre', isEqualTo: _usernameController.text)
+          .where('Contraseña', isEqualTo: _passwordController.text)
+          .get();
+
+      if (result.docs.isEmpty) {
+        return false; // No encontró superadmin
+      }
+
+      // Obtiene el primer documento de la consulta
+      final userDoc = result.docs.first;
+      final String userId = userDoc.id; // ID del documento, usado como userId
+      final String rol = userDoc['rol'];
+
+       setState(() {
+          this.userRol = rol;  // Guardas el rol en una variable local
+         });
+
+
+
+  
+
+      Navigator.pushReplacement(
+        
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(userId: userId, userRole: rol), // Pasa el userId a HomePage
+        ),
+      );
+
+      return true; // Autenticación de superadmin exitosa
+    } catch (e) {
+      print('Error de login: $e');
+      _showErrorSnackBar('Usuario o contraseña incorrectos');
+      return false;
+    } finally {
+>>>>>>> Stashed changes
       setState(() {
         _isLoading = true;
       });
 
+<<<<<<< Updated upstream
       try {
         // Consultacion del firestore
         final QuerySnapshot result = await FirebaseFirestore.instance
@@ -71,15 +126,128 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading = false;
           });
         }
+=======
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Validar en la colección "superadmin"
+      final QuerySnapshot superadminResult = await FirebaseFirestore.instance
+          .collection('superadmin')
+          .where('Nombre', isEqualTo: _usernameController.text)
+          .where('Contraseña', isEqualTo: _passwordController.text)
+          .get();
+
+      if (superadminResult.docs.isNotEmpty) {
+        // Usuario encontrado en superadmin
+        final userDoc = superadminResult.docs.first;
+        String rol = userDoc['rol'];
+
+        // Para depurar
+        print('Usuario encontrado: ${userDoc['Nombre']}');
+        _navigateToHome(userDoc.id, rol);
+        return;
+      }
+
+      // Validar en la colección "usuarios"
+      final QuerySnapshot usuariosResult = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('username', isEqualTo: _usernameController.text)
+          .where('password', isEqualTo: _passwordController.text)
+          .get();
+
+      if (usuariosResult.docs.isNotEmpty) {
+        // Usuario encontrado en usuarios
+        final userDoc = usuariosResult.docs.first;
+        String rol = userDoc['rol']; // Obtener el rol del usuario
+        
+        Timestamp fechaFinSuscripcion = userDoc['fechafinsubscripcion'];
+        bool notificar = userDoc['notificar'];
+        bool estadoSuscripcion = userDoc['estadosubscripcion'];
+        DateTime ahora = DateTime.now();
+
+        // Validar si la membresía ha expirado
+        if (ahora.isAfter(fechaFinSuscripcion.toDate())) {
+          throw Exception('Su suscripción ha expirado. Por favor, renueve su membresía.');
+        }
+
+        // Validar si la membresía está próxima a expirar (5 días antes)
+        DateTime cincoDiasAntes = fechaFinSuscripcion.toDate().subtract(Duration(days: 5));
+        if (ahora.isAfter(cincoDiasAntes) && ahora.isBefore(fechaFinSuscripcion.toDate())) {
+          // Activar notificación
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(userDoc.id)
+              .update({'notificar': true});
+
+          // Mostrar notificación al usuario
+          _showWarningSnackBar('Su membresía está próxima a expirar. Por favor, renueve antes de ${fechaFinSuscripcion.toDate()}');
+        }
+
+        // Validar estado de suscripción
+        if (!estadoSuscripcion) {
+          throw Exception('Su suscripción no está activa. Contacte con soporte.');
+        }
+
+        print('Usuario encontrado: ${userDoc['nombre']} ${userDoc['apellido']}');
+         if (rol == 'dueño') {
+          _navigateToHome(userDoc.id, rol); 
+          
+
+        }
+        
+        return;
+      }
+
+      // Si no se encuentra en ninguna colección
+      throw Exception('Usuario o contraseña incorrectos');
+    } catch (e) {
+      print('Error de login: $e');
+      _showErrorSnackBar(e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+>>>>>>> Stashed changes
       }
       
     }
   }
 
+<<<<<<< Updated upstream
   void _navigateToHome() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => HomePage()),
+=======
+   void _showWarningSnackBar(String message, {bool isExpirado = false}) {
+  final snackBar = SnackBar(
+    content: Text(
+      message,
+      style: TextStyle(color: Colors.white, fontSize: 16),
+    ),
+    backgroundColor: isExpirado ? Colors.red : Colors.amber, // Rojo para expirado, amarillo para aviso
+    duration: Duration(seconds: 5), // Tiempo de duración en pantalla
+    behavior: SnackBarBehavior.floating, // Flotante para mejor visualización
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10), // Bordes redondeados
+    ),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+ }
+
+  void _navigateToHome(String userId, String rol) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(userId: userId, userRole:rol)
+      ),
+>>>>>>> Stashed changes
     );
   }
 

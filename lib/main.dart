@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'login.dart';
+import 'dart:io'; // Import necesario para manejo local.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,35 @@ void main() async {
       measurementId: "G-RPLFXBQ278",
     ),
   );
+
+  // Aquí puedes cargar datos locales antes de ejecutar la aplicación.
+  await loadLocalData();
+
   runApp(const MyApp());
+}
+
+// Función para cargar datos locales (logo y título).
+Future<void> loadLocalData() async {
+  try {
+    final directory = Directory.systemTemp; // Cambia a tu path deseado.
+    final titleFile = File('${directory.path}/title.txt');
+    final logoFile = File('${directory.path}/logo.png');
+
+    if (await titleFile.exists()) {
+      String title = await titleFile.readAsString();
+      print('Título cargado: $title');
+    } else {
+      print('No se encontró un título guardado.');
+    }
+
+    if (await logoFile.exists()) {
+      print('Logo cargado correctamente.');
+    } else {
+      print('No se encontró un logo guardado.');
+    }
+  } catch (e) {
+    print('Error al cargar datos locales: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -39,11 +68,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class FirebaseService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  
   static Future<bool> testConnection() async {
     try {
       await _firestore.collection('usuarios').limit(1).get();
@@ -55,7 +82,6 @@ class FirebaseService {
     }
   }
 
-  
   static CollectionReference get usuarios {
     return _firestore.collection('usuarios');
   }

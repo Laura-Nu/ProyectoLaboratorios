@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 
 class UpdateAnalisis extends StatefulWidget {
+<<<<<<< Updated upstream
+=======
+  final String userId;
+  final String ventaId;
+  final String userRole;
+
+  const UpdateAnalisis({Key? key, required this.userId, required this.ventaId, required this.userRole}) : super(key: key);
+
+>>>>>>> Stashed changes
   @override
   _UpdateAnalisisState createState() => _UpdateAnalisisState();
 }
@@ -74,7 +83,11 @@ class _UpdateAnalisisState extends State<UpdateAnalisis> {
                 );
                 Navigator.push(
                   context,
+<<<<<<< Updated upstream
                   MaterialPageRoute(builder: (context) => GestionVentas()),
+=======
+                  MaterialPageRoute(builder: (context) => GestionVentas(userId: widget.userId, userRole: widget.userRole)),
+>>>>>>> Stashed changes
                 );
               },
               child: Text('Confirmar', style: TextStyle(color: Colors.white)),
