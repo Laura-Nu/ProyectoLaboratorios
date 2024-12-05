@@ -61,18 +61,6 @@ class Menu extends StatelessWidget {
               textColor: Colors.white,
             ),
             _buildDrawerItem(
-              icon: Icons.design_services,
-              title: 'SERVICIOS',
-              onTap: () => Navigator.pushReplacementNamed(context, '/servicios'),
-              textColor: Colors.white,
-            ),
-            _buildDrawerItem(
-              icon: Icons.shopping_cart,
-              title: 'COMPRAS',
-              onTap: () => Navigator.pushReplacementNamed(context, '/compras'),
-              textColor: Colors.white,
-            ),
-            _buildDrawerItem(
               icon: Icons.report,
               title: 'REPORTES',
               onTap: () {

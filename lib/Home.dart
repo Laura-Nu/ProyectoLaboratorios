@@ -12,6 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'Widgets/line_chart_widget.dart';
 
 class HomePage extends StatefulWidget {
+
   final String userId;
 
   const HomePage({Key? key, required this.userId}) : super(key: key);
@@ -73,151 +74,127 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetchPatientRegistrationCounts() async {
-    setState(() {
-      isLoading = true; 
-    });
+  setState(() {
+    isLoading = true; 
+  });
 
-    try {
-      DateTime now = DateTime.now();
-      DateTime startDate = selectedDate ?? now;
-      DateTime endDate = now;
+  try {
+    DateTime now = DateTime.now();
+    DateTime startDate = selectedDate ?? now;
+    DateTime endDate = now;
 
-      Map<String, int> countMap = {};
+    Map<String, int> countMap = {};
 
-      if (patientViewOption == 'Tiempo') {
-        if (selectedRange == 'Día') {
-          for (int i = 6; i <= 24; i += 3) {
-            String hourLabel =
-                '${i % 24 == 0 ? '12am' : '${i % 12} ${i < 12 ? 'am' : 'pm'}'}';
-            countMap[hourLabel] = 0;
-          }
-          endDate = startDate.add(Duration(days: 1));
-        } else if (selectedRange == 'Semana') {
-          List<String> days = [
-            'Lunes',
-            'Martes',
-            'Miércoles',
-            'Jueves',
-            'Viernes',
-            'Sábado',
-            'Domingo'
-          ];
-          for (var day in days) {
-            countMap[day] = 0;
-          }
-          startDate = startDate.subtract(Duration(days: startDate.weekday - 1));
-          endDate = startDate.add(Duration(days: 7));
-        } else if (selectedRange == 'Mes') {
-          for (int i = 1; i <= 4; i++) {
-            countMap['Semana $i'] = 0;
-          }
-          startDate = DateTime(startDate.year, startDate.month, 1);
-          endDate = DateTime(startDate.year, startDate.month + 1)
-              .subtract(Duration(days: 1));
+    // Definición de rangos de tiempo (Día, Semana, Mes)
+    if (patientViewOption == 'Tiempo') {
+      if (selectedRange == 'Día') {
+        for (int i = 6; i <= 24; i += 3) {
+          String hourLabel =
+              '${i % 24 == 0 ? '12am' : '${i % 12} ${i < 12 ? 'am' : 'pm'}'}';
+          countMap[hourLabel] = 0;
         }
-      } else {
-        List<String> months = [
-          'Enero',
-          'Febrero',
-          'Marzo',
-          'Abril',
-          'Mayo',
-          'Junio',
-          'Julio',
-          'Agosto',
-          'Septiembre',
-          'Octubre',
-          'Noviembre',
-          'Diciembre'
+        endDate = startDate.add(Duration(days: 1)); // Para incluir todo el día siguiente
+      } else if (selectedRange == 'Semana') {
+        List<String> days = [
+          'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
         ];
-        for (var month in months) {
-          countMap[month] = 0;
+        for (var day in days) {
+          countMap[day] = 0;
         }
-        startDate = DateTime(now.year, 1, 1);
-        endDate = DateTime(now.year, 12, 31);
+        startDate = startDate.subtract(Duration(days: startDate.weekday - 1)); // Inicio de la semana
+        endDate = startDate.add(Duration(days: 7)); // Final de la semana
+      } else if (selectedRange == 'Mes') {
+        for (int i = 1; i <= 4; i++) {
+          countMap['Semana $i'] = 0;
+        }
+        startDate = DateTime(startDate.year, startDate.month, 1); // Primer día del mes
+        endDate = DateTime(startDate.year, startDate.month + 1)
+            .subtract(Duration(days: 1)); // Último día del mes
       }
+    } else {
+      List<String> months = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 
+        'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      for (var month in months) {
+        countMap[month] = 0;
+      }
+      startDate = DateTime(now.year, 1, 1); // Inicio del año
+      endDate = DateTime(now.year, 12, 31); // Fin del año
+    }
 
-      Timestamp firebaseStartDate = Timestamp.fromDate(startDate);
-      Timestamp firebaseEndDate = Timestamp.fromDate(endDate);
+    // Convertir las fechas a Timestamps
+    Timestamp firebaseStartDate = Timestamp.fromDate(startDate);
+    Timestamp firebaseEndDate = Timestamp.fromDate(endDate);
 
-      QuerySnapshot pacientesSnapshot = await FirebaseFirestore.instance
-          .collection('pacientes')
-          .where('fechaRegistro', isGreaterThanOrEqualTo: firebaseStartDate)
-          .where('fechaRegistro', isLessThan: firebaseEndDate)
-          .get();
+    // Consulta en Firestore
+    QuerySnapshot pacientesSnapshot = await FirebaseFirestore.instance
+        .collection('pacientes')
+        .where('timestamp', isGreaterThanOrEqualTo: firebaseStartDate)
+        .where('timestamp', isLessThan: firebaseEndDate)
+        .get();
 
-      for (var doc in pacientesSnapshot.docs) {
-        var data = doc.data() as Map<String, dynamic>;
-        DateTime fechaRegistro = (data['fechaRegistro'] as Timestamp).toDate();
+    // Procesar los documentos recuperados
+    for (var doc in pacientesSnapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      
+      // Verificar si el campo 'timestamp' existe y es válido
+      if (data['timestamp'] != null) {
+        DateTime fechaRegistro = (data['timestamp'] as Timestamp).toDate();
 
         String label;
         if (patientViewOption == 'Tiempo') {
           if (selectedRange == 'Día') {
-            label =
-                '${(fechaRegistro.hour / 3).floor() * 3}:00 ${fechaRegistro.hour < 12 ? 'am' : 'pm'}';
+            label = '${(fechaRegistro.hour / 3).floor() * 3}:00 ${fechaRegistro.hour < 12 ? 'am' : 'pm'}';
           } else if (selectedRange == 'Semana') {
-            label = [
-              'Lunes',
-              'Martes',
-              'Miércoles',
-              'Jueves',
-              'Viernes',
-              'Sábado',
-              'Domingo'
-            ][fechaRegistro.weekday - 1];
+            label = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'][fechaRegistro.weekday - 1];
           } else {
             int weekNumber = ((fechaRegistro.day - 1) / 7).floor() + 1;
             label = 'Semana $weekNumber';
           }
         } else {
-          label = [
-            'Enero',
-            'Febrero',
-            'Marzo',
-            'Abril',
-            'Mayo',
-            'Junio',
-            'Julio',
-            'Agosto',
-            'Septiembre',
-            'Octubre',
-            'Noviembre',
-            'Diciembre'
-          ][fechaRegistro.month - 1];
+          label = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][fechaRegistro.month - 1];
         }
 
+        // Actualizar el conteo de pacientes en el mapa
         if (countMap.containsKey(label)) {
           countMap[label] = countMap[label]! + 1;
         } else {
           countMap[label] = 1;
         }
+      } else {
+        // Manejo de documento sin 'timestamp'
+        print('Documento sin timestamp válido: ${doc.id}');
       }
-
-      List<double> counts = [];
-      List<String> labels = [];
-      countMap.forEach((label, count) {
-        counts.add(count.toDouble());
-        labels.add(label);
-      });
-
-      double maxValue =
-          counts.isNotEmpty ? counts.reduce((a, b) => a > b ? a : b) : 0;
-      double scaleFactor =
-          maxValue > 10 ? (maxValue / 10).ceilToDouble() * 10 : 10;
-
-      setState(() {
-        patientCounts = counts;
-        timeLabels = labels;
-        maxYPatients = scaleFactor;
-      });
-    } catch (e) {
-      print("Error al obtener registros de pacientes: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
+
+    // Procesar los resultados para la visualización
+    List<double> counts = [];
+    List<String> labels = [];
+    countMap.forEach((label, count) {
+      counts.add(count.toDouble());
+      labels.add(label);
+    });
+
+    double maxValue =
+        counts.isNotEmpty ? counts.reduce((a, b) => a > b ? a : b) : 0;
+    double scaleFactor =
+        maxValue > 10 ? (maxValue / 10).ceilToDouble() * 10 : 10;
+
+    setState(() {
+      patientCounts = counts;
+      timeLabels = labels;
+      maxYPatients = scaleFactor;
+    });
+  } catch (e) {
+    print("Error al obtener registros de pacientes: $e");
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
+}
+
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -447,7 +424,7 @@ class _HomePageState extends State<HomePage> {
 
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('pacientes')
-        .where('fechaRegistro', isGreaterThanOrEqualTo: firebaseStartDate)
+        .where('timestamp', isGreaterThanOrEqualTo: firebaseStartDate)
         .get();
 
     setState(() {
@@ -731,7 +708,7 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
-      drawer: Menu(userId: widget.userId),
+      drawer: Menu(userId: widget.userId),	
       body: Stack(
         children: [
           SingleChildScrollView(
