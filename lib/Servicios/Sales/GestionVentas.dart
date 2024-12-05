@@ -263,7 +263,7 @@ Future<void> loadSalesData() async {
                           DataCell(
                             Align(
                               alignment: Alignment.centerRight,
-                              child: Text('\$${venta['total']}'),
+                              child: Text('Bs ${venta['total']}'),
                             ),
                           ),
                           DataCell(

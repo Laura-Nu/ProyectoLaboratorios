@@ -313,7 +313,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
                         .map((entry) => DataRow(
                               cells: [
                                 DataCell(Text(entry.value['analisis'])),
-                                DataCell(Text('\$${entry.value['precio']}')),
+                                DataCell(Text('Bs ${entry.value['precio']}')),
                                 DataCell(
                                   IconButton(
                                     icon: Icon(Icons.delete, color: Colors.red),

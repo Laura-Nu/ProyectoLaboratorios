@@ -206,15 +206,15 @@ Future<void> cargarDatos() async {
                           color: analisis['fueraDeRango'] ? PdfColors.red : PdfColors.black,
                         ),
                       ),
-                      '\$${(analisis['precio'] ?? 0.0).toStringAsFixed(2)}',
+                      'Bs ${(analisis['precio'] ?? 0.0).toStringAsFixed(2)}',
                     ];
                   }).toList(),
                 ),
                 pw.SizedBox(height: 16),
                 pw.Text('Resumen:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                pw.Text('Total: \$${total.toStringAsFixed(2)}'),
-                pw.Text('Importe Pagado: \$${total.toStringAsFixed(2)}'),
-                pw.Text('Saldo: \$0.00'),
+                pw.Text('Total: Bs ${total.toStringAsFixed(2)}'),
+                pw.Text('Importe Pagado: Bs ${total.toStringAsFixed(2)}'),
+                pw.Text('Saldo: Bs 0.00'),
               ],
             );
           },
@@ -323,7 +323,7 @@ Future<void> cargarDatos() async {
                           ),
                         ),
                       ),
-                      DataCell(Text('\$${analisis['precio'].toStringAsFixed(2)}')),
+                      DataCell(Text('Bs ${analisis['precio'].toStringAsFixed(2)}')),
                     ]);
                   }).toList(),
                 ),

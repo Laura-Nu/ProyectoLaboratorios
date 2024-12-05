@@ -463,7 +463,7 @@ void _showErrorModal(String message) {
                         .map((entry) => DataRow(
                               cells: [
                                 DataCell(Text(entry.value['analisis'])),
-                                DataCell(Text('\$${entry.value['precio'].toStringAsFixed(2)}')),
+                                DataCell(Text('Bs ${entry.value['precio'].toStringAsFixed(2)}')),
                                 DataCell(
                                   Container(
                                     width: 100, // Ajusta el ancho del campo de texto según tus necesidades

@@ -14,13 +14,11 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
   final _usernameController = TextEditingController();
   bool _isLoading = false;
 
-  // verificacion del  user  y email
   Future<bool> _verifyUser() async {
     final email = _emailController.text;
     final username = _usernameController.text;
 
     try {
-      // Buscar si existen las credenciales  (user y email)
       var userDoc = await FirebaseFirestore.instance
           .collection('superadmin')
           .where('Email', isEqualTo: email)
@@ -39,7 +37,6 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
     }
   }
 
-  
   Future<void> _verifyAndNavigate() async {
     if (_emailController.text.isEmpty || _usernameController.text.isEmpty) {
       _showErrorDialog('Completa todos los campos.');
@@ -54,7 +51,6 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
       bool isVerified = await _verifyUser();
 
       if (isVerified) {
-        
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -76,7 +72,6 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
     }
   }
 
-  
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -98,7 +93,7 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recuperar Contraseña"),
-        backgroundColor: const Color(0xFF1a237e),
+        backgroundColor: const Color.fromARGB(255, 240, 240, 245),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -112,61 +107,89 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
           ),
         ),
         child: Center(
-          child: Card(
-            margin: const EdgeInsets.all(16.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Verificacion de Usuario',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre de Usuario',
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Correo Electronico',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 45,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _verifyAndNavigate,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1a237e),
-                        foregroundColor: Colors.white,
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 400,
+              ),
+              child: Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Verificación de Usuario',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1a237e),
+                        ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text('Verificar'),
-                    ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre de Usuario',
+                          prefixIcon: Icon(Icons.person),
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Correo Electrónico',
+                          prefixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 14),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 300),
+                        width: double.infinity,
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _verifyAndNavigate,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1a237e),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Verificar',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
