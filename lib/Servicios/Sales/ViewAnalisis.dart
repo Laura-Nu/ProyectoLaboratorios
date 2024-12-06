@@ -44,115 +44,117 @@ class _ViewAnalisisState extends State<ViewAnalisis> {
     cargarDatos();
   }
 
-Future<void> cargarDatos() async {
-  try {
-    // Obtener paciente, usuario y ventas en paralelo
-    final pacienteFuture = FirebaseFirestore.instance
-        .collection('pacientes')
-        .doc(widget.pacienteId)
-        .get();
-    final usuarioFuture = FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(widget.userId)
-        .get();
-    final ventasFuture = FirebaseFirestore.instance.collection('ventas').get();
+  Future<void> cargarDatos() async {
+    try {
+      // Obtener paciente, usuario y ventas en paralelo
+      final pacienteFuture = FirebaseFirestore.instance
+          .collection('pacientes')
+          .doc(widget.pacienteId)
+          .get();
+      final usuarioFuture = FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(widget.userId)
+          .get();
+      final ventasFuture = FirebaseFirestore.instance.collection('ventas').get();
 
-    // Esperar que todas las consultas iniciales se completen
-    final results = await Future.wait([pacienteFuture, usuarioFuture, ventasFuture]);
+      // Esperar que todas las consultas iniciales se completen
+      final results = await Future.wait([pacienteFuture, usuarioFuture, ventasFuture]);
 
-    // Procesar datos del paciente
-    final pacienteSnapshot = results[0] as DocumentSnapshot<Map<String, dynamic>>;
-    if (pacienteSnapshot.exists) {
-      final pacienteData = pacienteSnapshot.data()!;
-      nombrePaciente =
-          '${pacienteData["nombre"] ?? "Desconocido"} ${pacienteData["apellido"] ?? ""}';
-      fechaNacimiento = pacienteData['fechaNacimiento'] != null
-          ? DateFormat('dd/MM/yyyy')
-              .format((pacienteData['fechaNacimiento'] as Timestamp).toDate())
-          : 'Desconocida';
-      sexo = pacienteData['sexo'] ?? 'Desconocido';
-    }
-
-    // Procesar datos del médico/usuario
-    final usuarioSnapshot = results[1] as DocumentSnapshot<Map<String, dynamic>>;
-    if (usuarioSnapshot.exists) {
-      final usuarioData = usuarioSnapshot.data()!;
-      medico = '${usuarioData["nombre"] ?? "Desconocido"} ${usuarioData["apellido"] ?? ""}';
-    }
-
-    // Generar el número de orden basado en la cantidad de ventas
-    final ventasSnapshot = results[2] as QuerySnapshot<Map<String, dynamic>>;
-    int numeroDeVentas = ventasSnapshot.size;
-    ordenLaboratorio = (numeroDeVentas + 1).toString().padLeft(10, '0');
-
-    // Configurar fechas
-    fechaRecepcion = DateFormat('dd/MM/yyyy').format(DateTime.now());
-    fechaEntrega =
-        DateFormat('dd/MM/yyyy').format(DateTime.now().add(const Duration(days: 1)));
-
-    // Obtener detalles de la venta y análisis en paralelo
-    final detalleVentaFuture = FirebaseFirestore.instance
-        .collection('detalleventa')
-        .where('idVenta', isEqualTo: widget.ventaId)
-        .get();
-    final ventaFuture = FirebaseFirestore.instance
-        .collection('ventas')
-        .doc(widget.ventaId)
-        .get();
-
-    final detallesResults = await Future.wait([detalleVentaFuture, ventaFuture]);
-
-    // Procesar detalle de venta
-    final detalleVentaQuery =
-        detallesResults[0] as QuerySnapshot<Map<String, dynamic>>;
-    if (detalleVentaQuery.docs.isNotEmpty) {
-      final detalleData = detalleVentaQuery.docs.first.data();
-      List<String> idAnalisisList = (detalleData['idAnalisis'] ?? []).cast<String>();
-
-      // Cargar resultados desde la venta
-      final ventaSnapshot = detallesResults[1] as DocumentSnapshot<Map<String, dynamic>>;
-      if (ventaSnapshot.exists) {
-        final ventaData = ventaSnapshot.data()!;
-        total = ventaData['total'] ?? 0.0;
-        importePagado = ventaData['importePagado'] ?? total;
-        saldo = total - importePagado;
-        final resultadosList = ventaData['resultados'] ?? [];
-
-        // Preprocesar análisis y mapear resultados
-        final analisisSnapshot = await FirebaseFirestore.instance.collection('analisis').get();
-        final analisisMap = {
-          for (var doc in analisisSnapshot.docs)
-            doc.data()['codigo']: doc.data()
-        };
-
-        analisisList = idAnalisisList.map((codigo) {
-          final analisisData = analisisMap[codigo] ?? {
-            'nombre': 'Análisis Desconocido',
-            'precio': 0.0,
-          };
-          final resultadoExistente = resultadosList.firstWhere(
-            (resultado) => resultado['analisis'] == analisisData['nombre'],
-            orElse: () => {'resultado': ''},
-          );
-          double rango = analisisData['rango_fin'] ?? double.infinity;
-          double? resultado =
-              double.tryParse(resultadoExistente['resultado'] ?? '');
-
-          return {
-            'nombre': analisisData['nombre'] ?? 'Análisis Desconocido',
-            'precio': analisisData['precio'] ?? 0.0,
-            'resultado': resultadoExistente['resultado'] ?? '',
-            'fueraDeRango': resultado != null && resultado > rango,
-          };
-        }).toList();
+      // Procesar datos del paciente
+      final pacienteSnapshot = results[0] as DocumentSnapshot<Map<String, dynamic>>;
+      if (pacienteSnapshot.exists) {
+        final pacienteData = pacienteSnapshot.data()!;
+        nombrePaciente =
+            '${pacienteData["nombre"] ?? "Desconocido"} ${pacienteData["apellido"] ?? ""}';
+        fechaNacimiento = pacienteData['fechaNacimiento'] != null
+            ? DateFormat('dd/MM/yyyy')
+                .format((pacienteData['fechaNacimiento'] as Timestamp).toDate())
+            : 'Desconocida';
+        sexo = pacienteData['sexo'] ?? 'Desconocido';
       }
-    }
 
-    setState(() {}); // Actualizar el estado con los nuevos datos cargados
-  } catch (e) {
-    print('Error al cargar datos: $e');
+      // Procesar datos del médico/usuario
+      final usuarioSnapshot = results[1] as DocumentSnapshot<Map<String, dynamic>>;
+      if (usuarioSnapshot.exists) {
+        final usuarioData = usuarioSnapshot.data()!;
+        medico = '${usuarioData["nombre"] ?? "Desconocido"} ${usuarioData["apellido"] ?? ""}';
+      }
+
+      // Generar el número de orden basado en la cantidad de ventas
+      final ventasSnapshot = results[2] as QuerySnapshot<Map<String, dynamic>>;
+      int numeroDeVentas = ventasSnapshot.size;
+      ordenLaboratorio = (numeroDeVentas + 1).toString().padLeft(10, '0');
+
+      // Configurar fechas
+      fechaRecepcion = DateFormat('dd/MM/yyyy').format(DateTime.now());
+      fechaEntrega =
+          DateFormat('dd/MM/yyyy').format(DateTime.now().add(const Duration(days: 1)));
+
+      // Obtener detalles de la venta y análisis en paralelo
+      final detalleVentaFuture = FirebaseFirestore.instance
+          .collection('detalleventa')
+          .where('idVenta', isEqualTo: widget.ventaId)
+          .get();
+      final ventaFuture = FirebaseFirestore.instance
+          .collection('ventas')
+          .doc(widget.ventaId)
+          .get();
+
+      final detallesResults = await Future.wait([detalleVentaFuture, ventaFuture]);
+
+      // Procesar detalle de venta
+      final detalleVentaQuery =
+          detallesResults[0] as QuerySnapshot<Map<String, dynamic>>;
+      if (detalleVentaQuery.docs.isNotEmpty) {
+        final detalleData = detalleVentaQuery.docs.first.data();
+        List<String> idAnalisisList = (detalleData['idAnalisis'] ?? []).cast<String>();
+
+        // Cargar resultados desde la venta
+        final ventaSnapshot = detallesResults[1] as DocumentSnapshot<Map<String, dynamic>>;
+        if (ventaSnapshot.exists) {
+          final ventaData = ventaSnapshot.data()!;
+          total = ventaData['total'] ?? 0.0;
+          importePagado = ventaData['importePagado'] ?? total;
+          saldo = total - importePagado;
+          final resultadosList = ventaData['resultados'] ?? [];
+
+          // Preprocesar análisis y mapear resultados
+          final analisisSnapshot = await FirebaseFirestore.instance.collection('analisis').get();
+          final analisisMap = {
+            for (var doc in analisisSnapshot.docs)
+              doc.data()['codigo']: doc.data()
+          };
+
+          analisisList = idAnalisisList.map((codigo) {
+            final analisisData = analisisMap[codigo] ?? {
+              'nombre': 'Análisis Desconocido',
+              'precio': 0.0,
+            };
+            final resultadoExistente = resultadosList.firstWhere(
+              (resultado) => resultado['analisis'] == analisisData['nombre'],
+              orElse: () => {'resultado': ''},
+            );
+            double rango = analisisData['rango_fin'] ?? double.infinity;
+            double? resultado =
+                double.tryParse(resultadoExistente['resultado'] ?? '');
+
+            return {
+              'nombre': analisisData['nombre'] ?? 'Análisis Desconocido',
+              'precio': analisisData['precio'] ?? 0.0,
+              'resultado': resultadoExistente['resultado'] ?? '',
+              'fueraDeRango': resultado != null && resultado > rango,
+              'rango_inicio': analisisData['rango_inicio'] ?? '',
+              'rango_fin': analisisData['rango_fin'] ?? '',
+            };
+          }).toList();
+        }
+      }
+
+      setState(() {}); // Actualizar el estado con los nuevos datos cargados
+    } catch (e) {
+      print('Error al cargar datos: $e');
+    }
   }
-}
 
 
   Future<void> _generarPDF() async {
@@ -195,11 +197,14 @@ Future<void> cargarDatos() async {
                 pw.Text('Fecha de Entrega: ${fechaEntrega.isNotEmpty ? fechaEntrega : 'No especificada'}'),
                 pw.SizedBox(height: 16),
                 pw.Text('Detalles de los Análisis:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                // Orden: Analisis, Rango_Inicio, Rango_Fin, Resultado, Importe
                 pw.Table.fromTextArray(
-                  headers: ['Análisis', 'Resultado', 'Importe'],
+                  headers: ['Análisis', 'Rango Inicio', 'Rango Fin', 'Resultado', 'Importe'],
                   data: analisisList.map((analisis) {
                     return [
                       analisis['nombre'] ?? 'Análisis Desconocido',
+                      analisis['rango_inicio'].toString(),
+                      analisis['rango_fin'].toString(),
                       pw.Text(
                         analisis['resultado'].toString(),
                         style: pw.TextStyle(
@@ -224,7 +229,6 @@ Future<void> cargarDatos() async {
       final pdfBytes = await pdf.save();
       print("PDF generado con éxito.");
 
-      // Verificación de plataforma para guardar o descargar el archivo
       if (kIsWeb) {
         // Descargar en la web
         final blob = html.Blob([pdfBytes], 'application/pdf');
@@ -288,6 +292,7 @@ Future<void> cargarDatos() async {
               ],
             ),
           ),
+          // En la interfaz, solo mostramos (Análisis, Resultado, Importe)
           Positioned(
             top: 220,
             left: 325,
@@ -346,8 +351,8 @@ Future<void> cargarDatos() async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailRow('Total', total.toStringAsFixed(2)),
-                    _buildDetailRow('Importe Pagado', total.toStringAsFixed(2)), // Usamos el total para ambos
-                    _buildDetailRow('Saldo', '0.00'), // Saldo fijo como 0 si todo está pagado
+                    _buildDetailRow('Importe Pagado', total.toStringAsFixed(2)),
+                    _buildDetailRow('Saldo', '0.00'),
                   ],
                 ),
               ),
