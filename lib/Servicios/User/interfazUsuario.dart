@@ -67,7 +67,7 @@ class _InterfazUsuarioState extends State<InterfazUsuario> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             _buildLabelWithBorder('NOMBRE:', userData!['nombre'] ?? ''),
-                            _buildLabelWithBorder('NOMBRE DE USUARIO:', userData!['nombreUsuario'] ?? ''),
+                            _buildLabelWithBorder('NOMBRE DE USUARIO:', userData!['username'] ?? ''),
                             _buildLabelWithBorder('APELLIDOS:', userData!['apellido'] ?? ''),
                             _buildLabelWithBorder('CARNET DE IDENTIFICACIÓN:', userData!['carnet'] ?? ''),
                             _buildLabelWithBorder('FECHA DE NACIMIENTO:', userData!['fechaNacimiento'] ?? ''),

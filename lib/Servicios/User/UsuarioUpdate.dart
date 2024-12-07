@@ -50,7 +50,7 @@ Future<void> loadUserData() async {
       var userData = userDoc.data() as Map<String, dynamic>;
       setState(() {
         _nombreController.text = userData['nombre'] ?? '';
-        _nombreUsuarioController.text = userData['nombreUsuario'] ?? '';
+        _nombreUsuarioController.text = userData['username'] ?? '';
         _apellidoController.text = userData['apellido'] ?? '';
         _carnetController.text = userData['carnet'] ?? '';
         _fechaNacimientoController.text = userData['fechaNacimiento'] ?? '';
@@ -80,7 +80,7 @@ Future<void> loadUserData() async {
             .doc(widget.userId)
             .update({
           'nombre': _nombreController.text,
-          'nombreUsuario': _nombreUsuarioController.text,
+          'username': _nombreUsuarioController.text,
           'apellido': _apellidoController.text,
           'carnet': _carnetController.text,
           'fechaNacimiento': _fechaNacimientoController.text,

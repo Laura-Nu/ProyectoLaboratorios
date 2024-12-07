@@ -6,6 +6,8 @@ import 'package:laboratorios/Servicios/User/interfazUsuario.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 import 'login.dart';
 import 'dart:io'; // Import necesario para manejo local.
+import 'package:provider/provider.dart'; // Asegúrate de importar el package provider
+import 'package:laboratorios/Providers/empresa_provider.dart'; // Importa tu provider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,14 +58,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'LIA - LAB',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return ChangeNotifierProvider(
+      create: (_) => EmpresaProvider()..cargarDatosEmpresa(),// Aquí le damos acceso a la empresa al resto de la app
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'LIA - LAB',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: const LoginPage(),
       ),
-      home: const LoginPage(),
     );
   }
 }
@@ -74,7 +79,6 @@ class FirebaseService {
   static Future<bool> testConnection() async {
     try {
       await _firestore.collection('usuarios').limit(1).get();
-      //print('Conexion a Firebase exitosa');
       return true;
     } catch (e) {
       print('Error en la conexion a Firebase: $e');

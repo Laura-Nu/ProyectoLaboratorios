@@ -20,9 +20,9 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
 
     try {
       var userDoc = await FirebaseFirestore.instance
-          .collection('superadmin')
-          .where('Email', isEqualTo: email)
-          .where('Nombre', isEqualTo: username)
+          .collection('usuarios')
+          .where('email', isEqualTo: email)
+          .where('username', isEqualTo: username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {

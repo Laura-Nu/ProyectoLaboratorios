@@ -11,10 +11,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  String userRol ='';
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _rememberMe = false;
   bool _isLoading = false;
 
   @override
@@ -50,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       // Obtiene el primer documento de la consulta
       final userDoc = result.docs.first;
       final String userId = userDoc.id; // ID del documento, usado como userId
+      
 
       Navigator.pushReplacement(
         context,
@@ -87,7 +88,7 @@ Future<void> _login() async {
       // Si no es superadmin, continúa con la autenticación de "dueño"
       final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('usuarios')
-          .where('nombreUsuario', isEqualTo: _usernameController.text)
+          .where('username', isEqualTo: _usernameController.text)
           .where('password', isEqualTo: _passwordController.text)
           .get();
 
@@ -97,6 +98,14 @@ Future<void> _login() async {
 
       final userDoc = result.docs.first;
       final String userId = userDoc.id;
+      final String rol = userDoc['rol']; 
+      
+      // Depuración: Imprimir el rol para verificación
+      print('Rol capturado: $rol');
+
+      setState(() {
+        this.userRol = rol;  // Guardas el rol en una variable local
+      });
 
       // Buscar la suscripción usando el userId
       final QuerySnapshot subscriptionResult = await FirebaseFirestore.instance
@@ -108,10 +117,10 @@ Future<void> _login() async {
         throw Exception('Membresía no encontrada');
       }
 
-        final subscriptionDoc = subscriptionResult.docs.first;
-        Timestamp fechaInicio = subscriptionDoc['fechaInicio'];
-        Timestamp fechaFin = subscriptionDoc['fechaFin'];
-        DateTime ahora = DateTime.now();
+      final subscriptionDoc = subscriptionResult.docs.first;
+      Timestamp fechaInicio = subscriptionDoc['fechaInicio'];
+      Timestamp fechaFin = subscriptionDoc['fechaFin'];
+      DateTime ahora = DateTime.now();
 
       // Verificar si la membresía ha caducado
       if (ahora.isBefore(fechaInicio.toDate()) || ahora.isAfter(fechaFin.toDate())) {
@@ -119,13 +128,16 @@ Future<void> _login() async {
         return;
       }
 
-      // Verificar que el rol sea "dueño"
-      if (userDoc['rol'] == 'dueño') {
-        _navigateToHome(userId);
-      } else {
-        _showErrorSnackBar('Acceso denegado: Solo dueños pueden iniciar sesión');
+      // Verificar si la membresía está a punto de caducar (5 días antes de la fecha de fin)
+      if (fechaFin.toDate().difference(ahora).inDays <= 5) {
+        _showMembershipExpiringDialog();
       }
+
+      // Navegar al Home pasando el userId y el rol
+      _navigateToHome(userId, rol);
+
     } catch (e) {
+      print('Error en el login: $e'); // Añadido para más depuración
       _showErrorSnackBar('Usuario o contraseña incorrectos');
     } finally {
       if (mounted) {
@@ -137,31 +149,74 @@ Future<void> _login() async {
   }
 }
 
+// Método para navegar al Home
+void _navigateToHome(String userId, String rol) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => HomePage(userId: userId,),
+    ),
+  );
+}
 
-  void _navigateToHome(String userId) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(userId: userId),
+// Mostrar mensaje cuando la membresía está a punto de caducar (5 días antes)
+void _showMembershipExpiringDialog() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Aviso'),
+      content: const Text('¡Su membresía está a punto de caducar!'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Aceptar'),
+        ),
+      ],
+    ),
+  );
+}
+
+// Mostrar mensaje cuando la membresía ha caducado
+void _showMembershipExpiredDialog() {
+   showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.red, // Fondo rojo
+      title: const Text(
+        'Error',
+        style: TextStyle(color: Colors.white), // Título en blanco
       ),
-    );
-  }
-
-  void _showMembershipExpiredDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: const Text('MEMBRESÍA CADUCADA'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Aceptar'),
+      content: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined, // Ícono de advertencia
+            color: Colors.white,
+            size: 30,
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            'Membresía caducada. Por favor, comuníquese con soporte técnico.',
+            style: TextStyle(color: Colors.white), // Texto en blanco
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Cerrar',
+            style: TextStyle(color: Colors.white), // Texto de cerrar en blanco
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  
+  
+  
 
   void _showErrorSnackBar(String message) {
     if (mounted) {

@@ -8,12 +8,14 @@ import 'dart:html' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
+import 'package:laboratorios/Login.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'Widgets/line_chart_widget.dart';
 
 class HomePage extends StatefulWidget {
 
   final String userId;
+  
 
   const HomePage({Key? key, required this.userId}) : super(key: key);
 
@@ -708,7 +710,7 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
-      drawer: Menu(userId: widget.userId),	
+      drawer: Menu(userId: widget.userId),
       body: Stack(
         children: [
           SingleChildScrollView(
