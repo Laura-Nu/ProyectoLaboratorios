@@ -8,9 +8,8 @@ class UpdateAnalysis extends StatefulWidget {
   final String AnalysisId;
   final Map<String, dynamic> AnalysisData;
   final String userId;
-  final String userRole;
 
-  UpdateAnalysis({required this.AnalysisId, required this.AnalysisData, required this.userId,required this.userRole});
+  UpdateAnalysis({required this.AnalysisId, required this.AnalysisData, required this.userId});
 
   @override
   _UpdateAnalysisState createState() => _UpdateAnalysisState();
@@ -81,7 +80,7 @@ class _UpdateAnalysisState extends State<UpdateAnalysis> {
       appBar: AppBar(
         title: Text('ACTUALIZAR ANÁLISIS'),
       ),
-      drawer: Menu(userId: widget.userId,userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -6,9 +6,8 @@ import 'package:laboratorios/Widgets/menu.dart';
 class CreatePatient extends StatefulWidget {
 
   final String userId;
-  final String userRole;
 
-  const CreatePatient({Key? key, required this.userId,required this.userRole}) : super(key: key);
+  const CreatePatient({Key? key, required this.userId}) : super(key: key);
 
   @override
   _CreatePatientState createState() => _CreatePatientState();
@@ -91,7 +90,7 @@ class _CreatePatientState extends State<CreatePatient> {
       appBar: AppBar(
         title: Text('AGREGAR NUEVO PACIENTE'),
       ),
-      drawer: Menu(userId: widget.userId,userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

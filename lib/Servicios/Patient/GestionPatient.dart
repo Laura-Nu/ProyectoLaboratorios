@@ -8,9 +8,8 @@ import 'package:laboratorios/Widgets/menu.dart';
 class GestionPatient extends StatefulWidget {
   
   final String userId;
-  final String userRole;
 
-  const GestionPatient({Key? key, required this.userId,required this.userRole}) : super(key: key);
+  const GestionPatient({Key? key, required this.userId}) : super(key: key);
 
 
   @override
@@ -82,7 +81,7 @@ class _GestionPatientState extends State<GestionPatient> {
       appBar: AppBar(
         title: Text('GESTIÓN DE PACIENTES'),
       ),
-      drawer: Menu(userId: widget.userId,userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -111,7 +110,7 @@ class _GestionPatientState extends State<GestionPatient> {
                   onPressed: () async {
                     final newPatient = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreatePatient(userId: widget.userId,userRole: widget.userRole)),
+                      MaterialPageRoute(builder: (context) => CreatePatient(userId: widget.userId,)),
                     );
 
                     if (newPatient != null) {
@@ -261,7 +260,6 @@ class _GestionPatientState extends State<GestionPatient> {
                                     context: context,
                                     builder: (context) => UpdatePatient(
                                       userId: widget.userId,
-                                      userRole: widget.userRole,
                                       patientId: paciente['id'],
                                       patientData: paciente,
                                     ),

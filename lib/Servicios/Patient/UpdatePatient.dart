@@ -7,10 +7,9 @@ class UpdatePatient extends StatefulWidget {
   final String patientId;
   final Map<String, dynamic> patientData;
   final String userId;
-  final String userRole;
 
 
-  UpdatePatient({required this.patientId, required this.patientData, required this.userId,required this.userRole});
+  UpdatePatient({required this.patientId, required this.patientData, required this.userId});
 
   @override
   _UpdatePatientState createState() => _UpdatePatientState();
@@ -93,7 +92,7 @@ class _UpdatePatientState extends State<UpdatePatient> {
       appBar: AppBar(
         title: Text('ACTUALIZAR PACIENTE'),
       ),
-      drawer: Menu(userId: widget.userId,userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

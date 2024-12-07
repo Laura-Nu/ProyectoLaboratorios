@@ -8,9 +8,8 @@ import 'package:laboratorios/Widgets/menu.dart';
 class GestionAnalysis extends StatefulWidget {
 
 final String userId;
-final String userRole;
 
-  const GestionAnalysis({Key? key, required this.userId,required this.userRole}) : super(key: key);
+  const GestionAnalysis({Key? key, required this.userId}) : super(key: key);
 
   @override
   _GestionAnalisisState createState() => _GestionAnalisisState();
@@ -80,7 +79,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
       appBar: AppBar(
         title: Text('GESTIÓN DE ANÁLISIS'),
       ),
-      drawer: Menu(userId: widget.userId, userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -109,7 +108,7 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                   onPressed: () async {
                     final newAnalisis = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CreateAnalysis(userId: widget.userId, userRole: widget.userRole)),
+                      MaterialPageRoute(builder: (context) => CreateAnalysis(userId: widget.userId)),
                     );
 
                     if (newAnalisis != null) {
@@ -215,7 +214,6 @@ class _GestionAnalisisState extends State<GestionAnalysis> {
                                     context: context,
                                     builder: (context) => UpdateAnalysis(
                                       userId: widget.userId,
-                                      userRole: widget.userRole,
                                       AnalysisId: analisis['id'],
                                       AnalysisData: analisis,
                                     ),

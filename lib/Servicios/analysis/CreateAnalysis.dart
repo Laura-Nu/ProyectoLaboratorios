@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laboratorios/Widgets/menu.dart';
-import 'package:laboratorios/Login.dart';
 
 class CreateAnalysis extends StatefulWidget {
 
   final String userId;
-  final String userRole;
 
-  const CreateAnalysis({Key? key, required this.userId, required this.userRole}) : super(key: key);
+  const CreateAnalysis({Key? key, required this.userId}) : super(key: key);
 
   @override
   _CreateAnalysisState createState() => _CreateAnalysisState();
@@ -95,7 +93,7 @@ class _CreateAnalysisState extends State<CreateAnalysis> {
       appBar: AppBar(
         title: Text('AGREGAR NUEVO ANÁLISIS'),
       ),
-      drawer: Menu(userId: widget.userId, userRol: widget.userRole),
+      drawer: Menu(userId: widget.userId),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

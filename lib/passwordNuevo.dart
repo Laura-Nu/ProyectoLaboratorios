@@ -41,16 +41,16 @@ class _PasswordNuevoPageState extends State<PasswordNuevoPage> {
 
     try {
       var userDoc = await FirebaseFirestore.instance
-          .collection('superadmin')
-          .where('Email', isEqualTo: widget.email)
-          .where('Nombre', isEqualTo: widget.username)
+          .collection('usuarios')
+          .where('email', isEqualTo: widget.email)
+          .where('username', isEqualTo: widget.username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {
         await FirebaseFirestore.instance
-            .collection('superadmin')
+            .collection('usuarios')
             .doc(userDoc.docs.first.id)
-            .update({'Contraseña': newPassword});
+            .update({'password': newPassword});
 
         _showSuccessDialog('Contraseña actualizada correctamente');
       } else {

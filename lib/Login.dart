@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-<<<<<<< Updated upstream
 import 'home.dart';
-import 'package:laboratorios/Widgets/menu.dart';
-=======
-import 'Home.dart';
-import 'package:laboratorios/widgets/menu.dart';
->>>>>>> Stashed changes
 import 'recoverPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,11 +11,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String userRol = '';
+  String userRol ='';
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -30,10 +29,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-<<<<<<< Updated upstream
-  Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-=======
  Future<bool> _loginAsSuperAdmin() async {
   if (_formKey.currentState!.validate()) {
     setState(() {
@@ -55,21 +50,12 @@ class _LoginPageState extends State<LoginPage> {
       // Obtiene el primer documento de la consulta
       final userDoc = result.docs.first;
       final String userId = userDoc.id; // ID del documento, usado como userId
-      final String rol = userDoc['rol'];
-
-       setState(() {
-          this.userRol = rol;  // Guardas el rol en una variable local
-         });
-
-
-
-  
+      
 
       Navigator.pushReplacement(
-        
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(userId: userId, userRole: rol), // Pasa el userId a HomePage
+          builder: (context) => HomePage(userId: userId), // Pasa el userId a HomePage
         ),
       );
 
@@ -79,193 +65,158 @@ class _LoginPageState extends State<LoginPage> {
       _showErrorSnackBar('Usuario o contraseña incorrectos');
       return false;
     } finally {
->>>>>>> Stashed changes
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
+    }
+  }
+  return false;
+}
 
-<<<<<<< Updated upstream
-      try {
-        // Consultacion del firestore
-        final QuerySnapshot result = await FirebaseFirestore.instance
-            .collection('superadmin')
-            .where('Nombre', isEqualTo: _usernameController.text)
-            .where('Contraseña', isEqualTo: _passwordController.text)
-            .get();
-
-        if (result.docs.isEmpty) {
-          throw Exception('Usuario o contraseña incorrectos');
-        }
-
-        // Verificar las fechas
-        final userDoc = result.docs.first;
-        Timestamp fechaInicio = userDoc['FechaInicio'];
-        Timestamp fechaFin = userDoc['FechaFin'];
-        DateTime ahora = DateTime.now();
-
-        // Para depuración
-        print('Usuario encontrado: ${userDoc['Nombre']}');
-        print('Fecha inicio: ${fechaInicio.toDate()}');
-        print('Fecha fin: ${fechaFin.toDate()}');
-        print('Fecha actual: $ahora');
-
-        if (ahora.isBefore(fechaInicio.toDate()) || ahora.isAfter(fechaFin.toDate())) {
-          _showMembershipExpiredDialog();
-          return;
-        }
-
-        
-        _navigateToHome();
-        
-      } catch (e) {
-        print('Error de login: $e'); 
-        _showErrorSnackBar('Error al iniciar sesion. Verifique sus credenciales');
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-=======
-  Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
+Future<void> _login() async {
+  if (_formKey.currentState!.validate()) {
     setState(() {
       _isLoading = true;
     });
 
+    // Verifica si es superadmin, si es así, detiene la función
+    if (await _loginAsSuperAdmin()) {
+      return;
+    }
+
     try {
-      // Validar en la colección "superadmin"
-      final QuerySnapshot superadminResult = await FirebaseFirestore.instance
-          .collection('superadmin')
-          .where('Nombre', isEqualTo: _usernameController.text)
-          .where('Contraseña', isEqualTo: _passwordController.text)
-          .get();
-
-      if (superadminResult.docs.isNotEmpty) {
-        // Usuario encontrado en superadmin
-        final userDoc = superadminResult.docs.first;
-        String rol = userDoc['rol'];
-
-        // Para depurar
-        print('Usuario encontrado: ${userDoc['Nombre']}');
-        _navigateToHome(userDoc.id, rol);
-        return;
-      }
-
-      // Validar en la colección "usuarios"
-      final QuerySnapshot usuariosResult = await FirebaseFirestore.instance
+      // Si no es superadmin, continúa con la autenticación de "dueño"
+      final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('usuarios')
           .where('username', isEqualTo: _usernameController.text)
           .where('password', isEqualTo: _passwordController.text)
           .get();
 
-      if (usuariosResult.docs.isNotEmpty) {
-        // Usuario encontrado en usuarios
-        final userDoc = usuariosResult.docs.first;
-        String rol = userDoc['rol']; // Obtener el rol del usuario
-        
-        Timestamp fechaFinSuscripcion = userDoc['fechafinsubscripcion'];
-        bool notificar = userDoc['notificar'];
-        bool estadoSuscripcion = userDoc['estadosubscripcion'];
-        DateTime ahora = DateTime.now();
+      if (result.docs.isEmpty) {
+        throw Exception('Credenciales inválidas');
+      }
 
-        // Validar si la membresía ha expirado
-        if (ahora.isAfter(fechaFinSuscripcion.toDate())) {
-          throw Exception('Su suscripción ha expirado. Por favor, renueve su membresía.');
-        }
+      final userDoc = result.docs.first;
+      final String userId = userDoc.id;
+      final String rol = userDoc['rol']; 
+      
+      // Depuración: Imprimir el rol para verificación
+      print('Rol capturado: $rol');
 
-        // Validar si la membresía está próxima a expirar (5 días antes)
-        DateTime cincoDiasAntes = fechaFinSuscripcion.toDate().subtract(Duration(days: 5));
-        if (ahora.isAfter(cincoDiasAntes) && ahora.isBefore(fechaFinSuscripcion.toDate())) {
-          // Activar notificación
-          await FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(userDoc.id)
-              .update({'notificar': true});
+      setState(() {
+        this.userRol = rol;  // Guardas el rol en una variable local
+      });
 
-          // Mostrar notificación al usuario
-          _showWarningSnackBar('Su membresía está próxima a expirar. Por favor, renueve antes de ${fechaFinSuscripcion.toDate()}');
-        }
+      // Buscar la suscripción usando el userId
+      final QuerySnapshot subscriptionResult = await FirebaseFirestore.instance
+          .collection('suscripciones')
+          .where('userId', isEqualTo: userId)
+          .get();
 
-        // Validar estado de suscripción
-        if (!estadoSuscripcion) {
-          throw Exception('Su suscripción no está activa. Contacte con soporte.');
-        }
+      if (subscriptionResult.docs.isEmpty) {
+        throw Exception('Membresía no encontrada');
+      }
 
-        print('Usuario encontrado: ${userDoc['nombre']} ${userDoc['apellido']}');
-         if (rol == 'dueño') {
-          _navigateToHome(userDoc.id, rol); 
-          
+      final subscriptionDoc = subscriptionResult.docs.first;
+      Timestamp fechaInicio = subscriptionDoc['fechaInicio'];
+      Timestamp fechaFin = subscriptionDoc['fechaFin'];
+      DateTime ahora = DateTime.now();
 
-        }
-        
+      // Verificar si la membresía ha caducado
+      if (ahora.isBefore(fechaInicio.toDate()) || ahora.isAfter(fechaFin.toDate())) {
+        _showMembershipExpiredDialog();
         return;
       }
 
-      // Si no se encuentra en ninguna colección
-      throw Exception('Usuario o contraseña incorrectos');
+      // Verificar si la membresía está a punto de caducar (5 días antes de la fecha de fin)
+      if (fechaFin.toDate().difference(ahora).inDays <= 5) {
+        _showMembershipExpiringDialog();
+      }
+
+      // Navegar al Home pasando el userId y el rol
+      _navigateToHome(userId, rol);
+
     } catch (e) {
-      print('Error de login: $e');
-      _showErrorSnackBar(e.toString());
+      print('Error en el login: $e'); // Añadido para más depuración
+      _showErrorSnackBar('Usuario o contraseña incorrectos');
     } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
->>>>>>> Stashed changes
       }
-      
     }
   }
+}
 
-<<<<<<< Updated upstream
-  void _navigateToHome() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage()),
-=======
-   void _showWarningSnackBar(String message, {bool isExpirado = false}) {
-  final snackBar = SnackBar(
-    content: Text(
-      message,
-      style: TextStyle(color: Colors.white, fontSize: 16),
-    ),
-    backgroundColor: isExpirado ? Colors.red : Colors.amber, // Rojo para expirado, amarillo para aviso
-    duration: Duration(seconds: 5), // Tiempo de duración en pantalla
-    behavior: SnackBarBehavior.floating, // Flotante para mejor visualización
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10), // Bordes redondeados
+// Método para navegar al Home
+void _navigateToHome(String userId, String rol) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => HomePage(userId: userId,),
     ),
   );
+}
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
- }
+// Mostrar mensaje cuando la membresía está a punto de caducar (5 días antes)
+void _showMembershipExpiringDialog() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Aviso'),
+      content: const Text('¡Su membresía está a punto de caducar!'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Aceptar'),
+        ),
+      ],
+    ),
+  );
+}
 
-  void _navigateToHome(String userId, String rol) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(userId: userId, userRole:rol)
+// Mostrar mensaje cuando la membresía ha caducado
+void _showMembershipExpiredDialog() {
+   showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.red, // Fondo rojo
+      title: const Text(
+        'Error',
+        style: TextStyle(color: Colors.white), // Título en blanco
       ),
->>>>>>> Stashed changes
-    );
-  }
-
-  void _showMembershipExpiredDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: const Text('MEMBRESIA CADUCADA'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Aceptar'),
+      content: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined, // Ícono de advertencia
+            color: Colors.white,
+            size: 30,
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            'Membresía caducada. Por favor, comuníquese con soporte técnico.',
+            style: TextStyle(color: Colors.white), // Texto en blanco
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Cerrar',
+            style: TextStyle(color: Colors.white), // Texto de cerrar en blanco
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  
+  
+  
 
   void _showErrorSnackBar(String message) {
     if (mounted) {
@@ -281,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(

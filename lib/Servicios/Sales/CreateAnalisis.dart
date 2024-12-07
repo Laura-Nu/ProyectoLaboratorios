@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:laboratorios/Servicios/Sales/GestionVentas.dart';
 
 class CreateAnalisis extends StatefulWidget {
-<<<<<<< Updated upstream
-=======
   final String userId;
-  final String userRole;
 
-  const CreateAnalisis({Key? key, required this.userId, required this.userRole}) : super(key: key);
+  const CreateAnalisis({Key? key, required this.userId}) : super(key: key);
 
->>>>>>> Stashed changes
   @override
   _CrearAnalisisState createState() => _CrearAnalisisState();
 }
@@ -18,19 +16,75 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
   final TextEditingController _nombreController = TextEditingController();
   final List<Map<String, dynamic>> _analisisList = [];
   String? _selectedAnalisis;
-  final Map<String, double> _analisisPrecios = {
-    'Hemograma': 173.75,
-    'Perfil Lipídico': 208.50,
-    'Glucosa en Sangre': 104.25,
-    'Cultivos Bacterianos': 313.75,
-  };
+  String? _selectedPacienteId;
+  List<Map<String, dynamic>> _pacientesList = [];
+  List<Map<String, dynamic>> _analisisDataList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllPacientes();
+    _loadAllAnalisis();
+  }
+
+  Future<void> _loadAllPacientes() async {
+    try {
+      QuerySnapshot pacientesSnapshot =
+          await FirebaseFirestore.instance.collection('pacientes').get();
+      setState(() {
+        _pacientesList = pacientesSnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>? ?? {};
+          final nombre = data['nombre'] ?? '';
+          final apellido = data['apellido'] ?? '';
+          return {
+            'id': doc.id,
+            'nombreCompleto': '$nombre $apellido',
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print('Error al cargar pacientes: $e');
+    }
+  }
+
+  Future<void> _loadAllAnalisis() async {
+    try {
+      QuerySnapshot analisisSnapshot =
+          await FirebaseFirestore.instance.collection('analisis').get();
+      setState(() {
+        _analisisDataList = analisisSnapshot.docs
+            .map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              if (data['estado'] == 'Activo') {
+                return {
+                  'codigo': data['codigo'] ?? '',
+                  'nombre': data['nombre'] ?? '',
+                  'precio': data['precio'] ?? 0.0,
+                };
+              }
+              return null;
+            })
+            .where((element) => element != null)
+            .cast<Map<String, dynamic>>()
+            .toList();
+      });
+    } catch (e) {
+      print('Error al cargar análisis: $e');
+    }
+  }
 
   void _addAnalisis() {
     if (_selectedAnalisis != null) {
+      final analisisData = _analisisDataList.firstWhere(
+        (analisis) => analisis['nombre'] == _selectedAnalisis,
+        orElse: () => {'precio': 0.0},
+      );
+
       setState(() {
         _analisisList.add({
           'analisis': _selectedAnalisis!,
-          'precio': _analisisPrecios[_selectedAnalisis]!,
+          'codigo': analisisData['codigo'],
+          'precio': analisisData['precio'],
         });
       });
     }
@@ -42,8 +96,6 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
     });
   }
 
-<<<<<<< Updated upstream
-=======
   Future<void> _crearVenta() async {
     if (_selectedPacienteId == null || _analisisList.isEmpty) {
       print('Debe seleccionar un paciente y al menos un análisis.');
@@ -117,7 +169,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => GestionVentas(userId: widget.userId, userRole: widget.userRole),
+                    builder: (context) => GestionVentas(userId: widget.userId),
                   ),
                 );
               },
@@ -129,7 +181,6 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
     );
   }
 
->>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,68 +196,48 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center, 
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.center, 
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 120, 
+                  width: 120,
                   child: Text(
                     'NOMBRE:',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                SizedBox(width: 10), 
+                SizedBox(width: 10),
                 Container(
-                  width: 760, 
-                  child: TextField(
-                    controller: _nombreController,
-                    decoration: InputDecoration(
-                      hintText: 'Ingrese el nombre',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  width: 760,
+                  child: DropdownSearch<String>(
+                    items: _pacientesList.map((e) => e['nombreCompleto'] as String).toList(),
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        hintText: 'Ingrese el nombre del paciente',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center, 
-              children: [
-                Container(
-                  width: 120, 
-                  child: Text(
-                    'ANÁLISIS:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(width: 10), 
-                Container(
-                  width: 760, 
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 2), 
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    hint: Text('Seleccione un análisis'),
-                    value: _selectedAnalisis,
-                    underline: SizedBox(), 
-                    items: _analisisPrecios.keys
-                        .map((String analisis) => DropdownMenuItem<String>(
-                              value: analisis,
-                              child: Text(analisis),
-                            ))
-                        .toList(),
-                    onChanged: (String? newValue) {
+                    popupProps: PopupProps.dialog(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        controller: _nombreController,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar paciente',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    onChanged: (String? value) {
                       setState(() {
-                        _selectedAnalisis = newValue;
-                        _addAnalisis(); 
+                        _nombreController.text = value ?? '';
+                        _selectedPacienteId = _pacientesList.firstWhere(
+                            (paciente) => paciente['nombreCompleto'] == value)['id'];
                       });
                     },
                   ),
@@ -214,20 +245,58 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
               ],
             ),
             SizedBox(height: 20),
-
-            // DataGrid (DataTable) para mostrar los análisis y precios añadidos
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120,
+                  child: Text(
+                    'ANÁLISIS:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Container(
+                  width: 760,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: Text('Seleccione un análisis'),
+                    value: _selectedAnalisis,
+                    underline: SizedBox(),
+                    items: _analisisDataList
+                        .map((analisis) => DropdownMenuItem<String>(
+                              value: analisis['nombre'],
+                              child: Text(analisis['nombre']),
+                            ))
+                        .toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedAnalisis = newValue;
+                        _addAnalisis();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
             Center(
               child: Container(
-                width: 900, 
-                height: 300, 
+                width: 900,
+                height: 300,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black), 
-                  borderRadius: BorderRadius.circular(15), 
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: DataTable(
-                    columnSpacing: 40.0, 
+                    columnSpacing: 40.0,
                     headingRowHeight: 50,
                     headingTextStyle: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -244,7 +313,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
                         .map((entry) => DataRow(
                               cells: [
                                 DataCell(Text(entry.value['analisis'])),
-                                DataCell(Text('\$${entry.value['precio']}')),
+                                DataCell(Text('Bs ${entry.value['precio']}')),
                                 DataCell(
                                   IconButton(
                                     icon: Icon(Icons.delete, color: Colors.red),
@@ -258,8 +327,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
                 ),
               ),
             ),
-            Spacer(), 
-
+            Spacer(),
             Align(
               alignment: Alignment.bottomRight,
               child: ElevatedButton(
@@ -267,14 +335,7 @@ class _CrearAnalisisState extends State<CreateAnalisis> {
                   backgroundColor: Color(0xFF5B7FCE),
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GestionVentas(), 
-                  ),
-                );
-                },
+                onPressed: _crearVenta,
                 child: Text(
                   'CREAR',
                   style: TextStyle(color: Colors.white),
