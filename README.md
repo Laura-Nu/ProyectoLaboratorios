@@ -48,7 +48,7 @@ Sistema genérico para la gestión de laboratorios clínicos. Funcionalidades pr
 ---
 
 ## Instalación y Base de Datos
-- [Manual Técnico](#)
+- [Manual Técnico](https://youtu.be/ARsSI5n7yz0)
 - [Manual de Base de Datos](https://youtu.be/twhy2IhC4L8)
 
 ---
