@@ -1,43 +1,67 @@
-# Laboratorios Clinicos
+# Laboratorios Clínicos
 
-# Tabla de Contenidos
--[Descripción](#descripción)
--[Version actual](#versión-actual)
--[Tecnologías Utilizadas](#tecnologías-utilizadas)
--[Instalación y Base de Datos](#instalación-y-base-de-datos)
--[Como usar](#como-usar)
--[Contacto](#contacto)
+## Tabla de Contenidos
+- [Descripción](#descripción)
+- [Versión Actual](#versión-actual)
+- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Instalación y Base de Datos](#instalación-y-base-de-datos)
+- [Cómo Usar](#cómo-usar)
+- [Contacto](#contacto)
+
+---
 
 ## Descripción
-Sistema Generico (Super Administrador asigna un logo, Nombre empresa y direccion a un USUARIO)
-El superadminitrador que sea asignado desde bd (desde una tabla)
+Sistema genérico para la gestión de laboratorios clínicos. Funcionalidades principales:
 
-Gestion Pacientes (Crud)=> Registra sus datos basicos del paciente
-Gestion de Analisis (Crud) => Que tenga nombre, descripcion, precio y rango
-Gestion de usuarios (Dueños de los laboratorios) => Que tengan un perfil y pueden usar el sistema
-Realizar venta(Un USUARIO: Asigna Paciente, varios analisis)=>Se suma el total $$ y exportar a pdf
-En el sistema el USUARIO podra tener 1 mes gratis (Cuando el super admin crea al usuario, desde la primera vez q inicia sesion)
-El super admin cuando crea al USUARIO le asigna determinados meses + el gratuito al primer mes
-Cuando esta por expirar se le debe mostrar un mensaje al USUARIO para que haga el pago antes de la fecha 
-Sino realiza el pago se bloquea y no puede acceder el usuario mostrandole el msj que debe contactarse con soporte
+- **Sistema Superadministrador:** 
+  - El superadministrador puede asignar un logo, nombre de empresa y dirección a un usuario desde la base de datos.
+  - Asigna y gestiona usuarios (dueños de laboratorios) con sus respectivas cuentas.
 
-## Versión actual
-Versión 1.0
+- **Gestión de Pacientes:** 
+  - CRUD para registrar datos básicos de pacientes.
+
+- **Gestión de Análisis:** 
+  - CRUD para gestionar análisis clínicos, incluyendo nombre, descripción, precio y rango.
+
+- **Realización de Ventas:** 
+  - Asignación de un paciente y múltiples análisis a una venta.
+  - Cálculo automático del total en $ y exportación de la venta a PDF.
+
+- **Planes de Uso y Bloqueos:**
+  - Cada usuario tiene un mes gratuito desde su primer inicio de sesión.
+  - El superadministrador puede asignar meses adicionales al usuario.
+  - Al acercarse la fecha de expiración, el sistema envía una notificación para realizar el pago.
+  - Si el usuario no realiza el pago, su cuenta se bloquea mostrando un mensaje con instrucciones para contactar soporte.
+
+---
+
+## Versión Actual
+**Versión:** 1.0
+
+---
 
 ## Tecnologías Utilizadas
--**Lenguajes de Programación**:[Dart]
--**Frameworks y bibliotecas**:[Flutter]
--**Herramientas y servicios**:[Firebase]
+- **Lenguajes de Programación:** Dart
+- **Frameworks y Bibliotecas:** Flutter
+- **Herramientas y Servicios:** Firebase
+
+---
 
 ## Instalación y Base de Datos
--[Manual técnico]()
--[Manual de Base de Datos](https://youtu.be/twhy2IhC4L8)
+- [Manual Técnico](#)
+- [Manual de Base de Datos](https://youtu.be/twhy2IhC4L8)
 
-## Como usar
--[Manual de Usuario](https://youtu.be/waniw7T5MpM)
+---
+
+## Cómo Usar
+- [Manual de Usuario](https://youtu.be/waniw7T5MpM)
+
+---
 
 ## Contacto
--Hernan Jorge Salcedo Rosenthal(Version 1.0)
--Greisa Karen Aguila Lujan(Version 1.0)
--Ignacio Antonio Benavides Vargas(Version 1.0)
--Jared Nathanael Juan Quinteros Garcia(Version 1.0)
+Desarrollado por:
+
+- **Hernán Jorge Salcedo Rosenthal** (Versión 1.0)
+- **Greisa Karen Águila Luján** (Versión 1.0)
+- **Ignacio Antonio Benavides Vargas** (Versión 1.0)
+- **Jared Nathanael Juan Quinteros García** (Versión 1.0)
